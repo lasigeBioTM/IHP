@@ -1,0 +1,8 @@
+tolerance	non	0.0001	0.00001	0.001
+disjunctionWidth	disc	4	2	8
+wideDisjunctionWidth	disc	4	2	8
+sigma	non	1.0	0.1	5
+epsilon	non	0.01	0.005	1
+beamSize	disc	30	5	100
+maxLeft	disc	2	1	8
+maxRight	disc	2	1	8

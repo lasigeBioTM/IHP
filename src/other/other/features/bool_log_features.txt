@@ -1,0 +1,8 @@
+0.627858627859	useNGrams
+0.655246252677	useNeighborNGrams
+0.656652360515	useWordPairs
+0.658064516129	useSymWordPairs
+0.663793103448	useTypeSeqs
+0.666666666666	useTypeSeqs2
+0.668112798265	usePosition
+0.670995670996	useShapeConjunctions
