@@ -1,0 +1,23 @@
+{
+  "use_chebi": false,
+  "chebi_host": "",
+  "chebi_user": "",
+  "chebi_pw": "",
+  "chebi_db": "",
+  "use_go": false,
+  "go_host": "",
+  "go_user": "",
+  "go_pw": "",
+  "go_db": "",
+  "use_mirbase": false,
+  "mirbase_path": "",
+  "host_ip": "127.0.0.1",
+  "geniass_path": "./bin/geniass",
+  "florchebi_path": "./bin",
+  "corenlp_dir": "bin/stanford-corenlp-full-2015-01-30/",
+  "stanford_ner_dir": "bin/stanford-ner-2015-04-20/",
+  "stanford_ner_train_ram": "-Xmx8g",
+  "stanford_ner_test_ram": "-Xmx4g",
+  "stoplist": "data/stopwords.txt",
+  "termlist_dir": "data/lists"
+}
