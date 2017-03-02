@@ -1,5 +1,5 @@
-# IBEnt
-Framework for identifying biomedical entities
+# IHP
+Framework for identifying Human Phenotype entities
 
 Dependencies and other uses should follow the original ReadMe.
 
@@ -7,7 +7,7 @@ This is a fork created to accomodate an annotator for the [Human Phenotype Ontol
 It uses Gold Standard Corpora and Test Suites Created by Bio-Lark. [Link Here](http://bio-lark.org/hpo_res.html)
 
 # Usage
-If a corpus is to be loaded into IBEnt, it's necessary to run Stanford CoreNLP. 
+If a corpus is to be loaded into IHP, it's necessary to run Stanford CoreNLP. 
    ```
    cd StanfordCoreNLP_Folder
    java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -timeout 500000
