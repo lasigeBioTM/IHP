@@ -1,0 +1,6 @@
+mild to severe
+mild to moderate
+mild to profound
+moderate to severe
+moderate to profound
+severe to profound
