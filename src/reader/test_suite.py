@@ -4,15 +4,18 @@ import logging
 import glob
 import os
 
-from text.corpus import Corpus
+from reader.hpo_corpus import HPOCorpus
 #from text.document import Document
 from text.hpo_document import HPODocument
-from other.dictionary import stopwords, removewords, go_words, definingwords
+from other.dictionary import stopwords, removewords, go_words, definingwords, good_nouns
 
+same_stop_words = [""]
+describing = ["recurrent", "male", "female", "postnatal", "progressive", "isolated", "postpubertal", "severe", "distal", "conductive", "mixed", "congenital", "bilateral", "unilateral", "chronic", "episodic", "mild", "borderline-mild", "global", "generalized", "partial", "acute", "proximal", "profound", "complete", "moderate", "diffuse", "nonprogressive", "extreme", "general"]
 annotation_gazette = open("data/annotation_gazette.txt")
+gazette = open("data/gazette.txt")
 ann_gaz = [x.strip() for x in annotation_gazette]
-
-class SuiteCorpus(Corpus):
+gazz = [x.strip() for x in gazette]
+class SuiteCorpus(HPOCorpus):
 	"""Human Genotype Ontology corpus - Example (http://bio-lark.org/hpo_res.html)"""
 
 	def __init__(self, corpusdir, **kwargs): #corpusdir in config.py
@@ -169,142 +172,6 @@ class SuiteCorpus(Corpus):
 		entity = sentence.entities.find_entity(start - sentence.offset, end - sentence.offset)
 		return tokens, sentence, entity
 
-	def get_offsets(self, esource, ths, rules):
-		"""
-		Retrieve the offsets of entities found with the models in source to evaluate
-		:param esources:
-		:return: List of tuple : (did, start, end, text)
-		"""
-		i = 0
-		offsets = {} # {did1: [(0,5), (10,14)], did2: []...}
-		for did in self.documents:
-			i += 1
-			print self.documents[did].sentences, i
-			offsets[did] = self.documents[did].get_offsets(esource, ths, rules)
-		offsets_list = []
-		for did in offsets:
-			for o in offsets[did]:
-				offsets_list.append((did, o[0], o[1], o[2]))
-				#print did, o[0], o[1], o[2]
-
-
-		offsets_list = list(set(offsets_list))
-		off = [str(x[3].encode("utf-8")) for x in offsets_list] #List of terms to be passed for second validation
-		#Twice Validated (get_offsets validated at the same time as getting results if rules are activated)
-		if "twice_validated" in rules:
-			#corenlp_client = StanfordCoreNLP('http://localhost:9000')
-			for did in self.documents:	
-				offsets[did] = self.documents[did].get_offsets(esource, ths, rules, off)
-			for did in offsets:
-				for o in offsets[did]:
-					offsets_list.append((did, o[0], o[1], o[2]))
-			offsets_list = list(set(offsets_list))
-
-			#Validation step -> Removal of wrong terms
-			to_remove = self.validate_corpus(offsets_list, rules)
-			for off in list(set(to_remove)):
-				offsets_list.remove(off)
-
-		return offsets_list
-
-
-	def validate_corpus(self, offsets_list, rules):
-		to_remove = []
-		for offset in offsets_list:
-			if str(offset[3].encode("utf-8")).lower() in stopwords:
-				to_remove.append(offset)
-			for word in removewords:
-				for w in go_words:
-					if word.lower() in str(offset[3].encode("utf-8").lower()) and w.lower() not in str(offset[3].encode("utf-8").lower()):
-						try:
-							to_remove.append(offset)
-						except ValueError:
-							pass
-			if "small_len" in rules:
-				if len(str(offset[3].encode("utf-8")).lower()) < 3:
-					to_remove.append(offset)
-			if "quotes" in rules:
-				try:
-					if '"' in str(offset[3].encode("utf-8")).lower():
-						if str(offset[3].encode("utf-8")).lower().count('"') == 1:
-							to_remove.append(offset)
-				except UnicodeDecodeError:
-					pass
-			if "defwords" in rules:
-				flag = False
-				for word in definingwords:
-					if word in str(offset[3].encode("utf-8")).lower():
-						flag = True
-				if flag:
-					if len(str(offset[3].encode("utf-8")).split(" ")) < 3:
-						to_remove.append(offset)
-
-			if "digits" in rules:
-				try:
-					for x in str(offset[3].encode("utf-8")).split(" "):
-						flags = [False for a in range(len(x))]
-						for i in range(len(x)):
-							flags[i] = x[i] in "0123456789," #",.;:!?." in there because might be after number
-						digflag = True
-						for f in flags:
-							if f == False:
-								digflag = False
-						if digflag == True:
-							to_remove.append(offset)
-				except UnicodeDecodeError:
-					pass
-			if "gowords" in rules: #Removes terms that have 2 of the go words because it doesn't really happen.
-				i = 0
-				for word in go_words:
-					if word in str(offset[3].encode("utf-8")):
-						i += 1
-				if i > 1:
-					to_remove.append(offset)
-
-			# if "check_nouns" in rules:
-			# 	if len(str(offset[3].encode("utf-8")).split(" ")) > 2 and str(offset[3].encode("utf-8")).lower().strip() not in ann_gaz:
-			# 		corenlpres = corenlp_client.annotate(str(offset[3].encode("utf-8")), properties={
-			# 						'annotators': 'tokenize,pos',
-			# 						'outputFormat': 'json',
-			# 					})
-			# 		toks = corenlpres['sentences'][0]['tokens']
-			# 		noun_flag = False
-			# 		postags = [ str(x['pos']) for x in toks]
-			# 		if "NN" in postags or "NNS" in postags: #or "VBG" in postags:
-			# 			noun_flag = True
-			# 		if noun_flag == False:
-			# 			print offset
-			# 			to_remove.append(offset)
-
-			if "lastword" in rules:
-				from pycorenlp import StanfordCoreNLP
-				corenlp_client = StanfordCoreNLP('http://localhost:9000')
-				exlude_last = ['-LRB-', 'TO', 'IN', 'PRP', '.', '.', 'CC', 'DT']
-				corenlpres = corenlp_client.annotate(str(offset[3].encode("utf-8")), properties={
-									'annotators': 'tokenize,pos',
-									'outputFormat': 'json',
-								})
-				toks = corenlpres['sentences'][0]['tokens']
-				postags = [ str(x['pos']) for x in toks]
-				#words = postags = [ str(x['word']) for x in toks]
-				if len(postags) > 1:
-					if postags[-1] in exlude_last:
-						print "Last word removed", offset
-						to_remove.append(offset)
-					if postags[-1] == "JJ" and postags[-2] in exlude_last:
-						print "Last word ADJ removed", offset
-						to_remove.append(offset)
-
-		return to_remove
-
-
-#Bracket (left) -  '-LRB-'
-#To - 'TO'
-#In, Within -  'IN'
-#Prepositions -  'PRP'
-#. - '.'
-#, - ','
-
 
 def tsuite_get_gold_ann_set(goldpath): #goldann="corpora/hpo/test_ann"
 	"""
@@ -336,7 +203,5 @@ def tsuite_get_gold_ann_set(goldpath): #goldann="corpora/hpo/test_ann"
 						pmid = file.split("/")[-1] + "." + title + "." + str(i)
 						goldlist.append((pmid, int(start), int(end), text))
 
-	#print goldlist[0:2]
 	goldset = set(goldlist)
-	#print goldset
 	return goldset, None
