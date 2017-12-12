@@ -11,6 +11,7 @@ from text.entity import Entity
 from text.time_entity import TimeEntity
 from text.event_entity import EventEntity
 from text.hpo_entity import HPOEntity
+import string
 
 #dic = []
 #a = open("data/gazette.txt").readlines()
@@ -24,65 +25,289 @@ for x in paths:
     path_dic[y[1]] = y[0]
 
 
-feature_extractors = {"text": lambda x, i: x.tokens[i].text,
-                      "prefix3": lambda x, i: x.tokens[i].text[:3],
-                      "prevprefix3": lambda x, i: prev_prefix(x, i, 3),
-                      #"nextprefix3": lambda x, i: next_prefix(x, i, 3),
-                      #"suffix3": lambda x, i: x.tokens[i].text[-3:],
-                      "prevsuffix3": lambda x, i: prev_suffix(x, i, 3),
-                      "nextsuffix3": lambda x, i: next_suffix(x, i, 3),
-                      "prefix2": lambda x, i: x.tokens[i].text[:2],
-                      #"suffix2": lambda x, i: x.tokens[i].text[-2:], #Removes total jaw cysts.
-                      #"prefix4": lambda x, i: x.tokens[i].text[:4],
-                      #"suffix4": lambda x, i: x.tokens[i].text[-4:],
-                      #"hasnumber": lambda x, i: str(any(c.isdigit() for c in x.tokens[i].text)),
-                      "case": lambda x, i: word_case(x.tokens[i].text),
-                      #"prevcase": lambda x, i: prev_case(x, i),
-                      #"nextcase": lambda x, i: next_case(x, i),
-                      "lemma": lambda x, i: x.tokens[i].lemma, #Makes go down. Although with next ones go very slightly up.
-                      "prevlemma": lambda x, i: prev_lemma(x,i),
-                      #"nextlemma": lambda x, i: next_lemma(x,i),
+lex = ["the", "of", "and", "in", "is", "as", "for", "that", "was", "are", "this", "we", "were", "by", "have", "from", "these", "be", "had", "been", "which", "may", "has", "not", "other"]#, "but", "who", "than"]
+
+nouns = ["syndrome", "patients", "mutations", "gene", "nf2", "chromosome", "cases", "mutation", "families", "deletion", "clinical"]
+
+feature_extractors = {
+                    #Linguistic Features
+                      "lemma": lambda x, i: x.tokens[i].lemma,
                       "postag": lambda x, i: x.tokens[i].pos,
-                      "prevpostag": lambda x, i: prev_pos(x,i),
-                      "nextpostag": lambda x, i: next_pos(x,i),
-                      "wordclass": lambda x, i: wordclass(x.tokens[i].text),
-                      "prevwordclass": lambda x, i: prev_wordclass(x, i),
-                      "prevword": lambda x, i: prev_word(x, 1),
-                      "prevword2": lambda x, i: prev_word(x, 2),
-                      "prevword3": lambda x, i: prev_word(x, 3),
-                      "prevword4": lambda x, i: prev_word(x, 4),
-                      "prevword5": lambda x, i: prev_word(x, 5),
-                      "prevword6": lambda x, i: prev_word(x, 6),
-                      "nextword": lambda x, i: prev_word(x, 1),
-                      "nextword2": lambda x, i: prev_word(x, 2),
-                      "nextword3": lambda x, i: prev_word(x, 3),
-                      "nextword4": lambda x, i: prev_word(x, 4),
-                      "nextword5": lambda x, i: prev_word(x, 5),
-                      "nextword6": lambda x, i: prev_word(x, 6),
-                      #"in_dic": lambda x, i: word_in_dictionary(x.tokens[i].text, dic),
-                      "prev_word_and": lambda x, i: prev_word_and(x, i),
-                      "next_word_and": lambda x, i: next_word_and(x, i),
-                      "brown_cluster": lambda x, i: brown_cluster(x, i),
-                      #"prev_words": lambda x, i: prev_words(x, i, 2),
-                      #"next_words": lambda x, i: next_words(x, i, 6),
 
+                    # # #Orthigraphic Features
+                      "case": lambda x, i: word_case(x.tokens[i].text),
+                      "hasnumber": lambda x, i: str(any(c.isdigit() for c in x.tokens[i].text)),  
+                      "hasdash": lambda x, i: contains(x, i, 0, "-"),
+                      "hasquote": lambda x, i: contains(x, i, 0, "'"),
+                      "hasquote2": lambda x, i: contains(x, i, 0, '"'),
+                      "hasparen1": lambda x, i: contains(x, i, 0, "("),
+                      "hasparen2": lambda x, i: contains(x, i, 0, ")"),
+                      "hasbrack1": lambda x, i: contains(x, i, 0, "["),
+                      "hasbrack2": lambda x, i: contains(x, i, 0, "]"),
+                      "hasslash": lambda x, i: contains(x, i, 0, '/'),
 
-                      #"nextwordclass": lambda x, i: next_wordclass(x, i),
-                      #"simplewordclass": lambda x, i: simplewordclass(x.tokens[i].text),
-                      # "greek": lambda x, i: str(has_greek_symbol(x.tokens[i].text)),
-                      # "aminoacid": lambda x, i: str(any(w in amino_acids for w in x.tokens[i].text.split('-'))),
-                      # "periodictable": lambda x, i: str(x.tokens[i].text in element_base.keys() or x.tokens[i].text.title() in zip(*element_base.values())[0]), # this should probably be its own function ffs
-                      }
+                    # # #Morphological Features - Maybe find specific affixes
+                      "prefix2": lambda x, i: x.tokens[i].text[:2],
+                      "prefix3": lambda x, i: x.tokens[i].text[:3],
+                      "suffix1": lambda x, i: x.tokens[i].text[-1:],
+                      "suffix2": lambda x, i: x.tokens[i].text[-2:],
+                      "suffix3": lambda x, i: x.tokens[i].text[-3:],
+                      "suffix4": lambda x, i: x.tokens[i].text[-4:],
 
-def prev_wordclass(sentence, i):
-    if i == 0:
+                      "wordshape": lambda x, i: wordshape(x,i),               
+                    
+                      "prevbigram": lambda x, i: prevbigram(x, i),
+
+                    # # #Context Features
+                      "prevlemma1": lambda x, i: prev_lemma(x,i,1),
+                      "nextlemma1": lambda x, i: next_lemma(x,i,1),
+                      "prevlemma2": lambda x, i: prev_lemma(x,i,2),
+                      "nextlemma2": lambda x, i: next_lemma(x,i,2),
+
+                      "prevpostag2": lambda x, i: prev_pos(x,i,1),
+                      "nextpostag2": lambda x, i: next_pos(x,i,1),
+                      "prevpostag3": lambda x, i: prev_pos(x,i,2),
+                      "nextpostag3": lambda x, i: next_pos(x,i,2),  
+                      "nextpostag4": lambda x, i: next_pos(x,i,3),
+                      "nextpostag4": lambda x, i: next_pos(x,i,3),
+                      "prevpostag5": lambda x, i: prev_pos(x,i,4),
+                      "nextpostag5": lambda x, i: next_pos(x,i,4),        
+
+                      "prevprefix1": lambda x, i: prev_prefix(x, i, 0, 1), 
+                      "nextprefix1": lambda x, i: next_prefix(x, i, 0, 1),
+                      "prevprefix2": lambda x, i: prev_prefix(x, i, 0, 2), 
+                      "nextprefix2": lambda x, i: next_prefix(x, i, 0, 2), 
+                      "prevprefix3": lambda x, i: prev_prefix(x, i, 0, 3), 
+                      "nextprefix3": lambda x, i: next_prefix(x, i, 0, 3),     
+                      "prev2prefix1": lambda x, i: prev_prefix(x, i, 1, 1), 
+                      "next2prefix1": lambda x, i: next_prefix(x, i, 1, 1), 
+                      "prev2prefix2": lambda x, i: prev_prefix(x, i, 1, 2), 
+                      "next2prefix2": lambda x, i: next_prefix(x, i, 1, 2), 
+                      "prev2prefix3": lambda x, i: prev_prefix(x, i, 1, 3), 
+                      "next2prefix3": lambda x, i: next_prefix(x, i, 1, 3), 
+                      "prev2suffix1": lambda x, i: prev_suffix(x, i, 1, 1), 
+                      "next2suffix1": lambda x, i: next_suffix(x, i, 1, 1), 
+                      "prev2suffix2": lambda x, i: prev_suffix(x, i, 1, 2), 
+                      "next2suffix2": lambda x, i: next_suffix(x, i, 1, 2), 
+                      "prev2suffix3": lambda x, i: prev_suffix(x, i, 1, 3), 
+                      "next2suffix3": lambda x, i: next_suffix(x, i, 1, 3), 
+                      "prev2suffix4": lambda x, i: prev_suffix(x, i, 1, 4), 
+                      "next2suffix4": lambda x, i: next_suffix(x, i, 1, 4), 
+
+                      "prevwordshape": lambda x, i: prev_wordshape(x, i, 1),
+                      "nextwordshape": lambda x, i: next_wordshape(x, i, 1),
+                      "prevwordshape2": lambda x, i: prev_wordshape(x, i, 2),
+                      "nextwordshape2": lambda x, i: next_wordshape(x, i, 2),
+
+                    #  #Lexicon Features - Works better with separate features not using lexicon.
+                      "stopwords": lambda x, i: lexicon(x, lex, i, 0),
+                      "stopwords_prev1": lambda x, i: lexicon(x, lex, i, -1),
+                      "stopwords_next1": lambda x, i: lexicon(x, lex, i, 1),
+                      "stopwords_prev2": lambda x, i: lexicon(x, lex, i, -2),
+                      "stopwords_next2": lambda x, i: lexicon(x, lex, i, 2),
+                      "stopwords_prev3": lambda x, i: lexicon(x, lex, i, -3),
+                      "stopwords_next3": lambda x, i: lexicon(x, lex, i, +3),
+                      "stopwords_prev4": lambda x, i: lexicon(x, lex, i, -4),
+                      "stopwords_next4": lambda x, i: lexicon(x, lex, i, +4),
+
+                    #  #Other Features
+                      "brown_cluster": lambda x, i: brown_cluster(x, i, 0),
+                      "length": lambda x, i: lengthclass(x, i),
+                                             }
+
+def lengthclass(sentence, i):
+    if len(sentence.tokens[i].text) <= 3:
+        return "A"
+    if len(sentence.tokens[i].text) > 3 and len(sentence.tokens[i].text)  <= 6:
+        return "B"
+    if len(sentence.tokens[i].text) > 6:
+        return "C"
+
+def presence(sentence, i, range):
+    for word in go_words:
+        if word in sentence.text:
+            t_flag = False
+            start = i-range
+            end = i+range
+            if start < 0:
+                start = 0
+            if end > len(sentence.tokens):
+                end = len(sentence.tokens)
+            for t in sentence.tokens[i-range:i+range]:
+                if word in t.text:
+                    t_flag = True
+            if t_flag:
+                return "1"
+            else:
+                return "2"
+        else:
+            return "0"
+
+def orthographic(sentence, i, punctuation_type):
+    if i >= len(sentence.tokens) - 1:
+        return "EOS"
+    elif i < 0:
         return "BOS"
+    elif sentence.tokens[i].text == punctuation_type:
+        return "1"
     else:
-        return wordclass(sentence.tokens[i-1].text)
+        return "0"
 
+def capitalized(sentence,i):
+    if sentence.tokens[i].text.istitle():
+        return "1"
+    else:
+        return "0"
 
-#####
-def brown_cluster(sentence, i):
+def affixes(sentence, i, atype, string):
+    p_len = len(string)
+    if atype == "prefix":
+        if sentence.tokens[i].text[:p_len] == string:
+            return "1"
+        else:
+          return "0"
+    if atype == "suffix":
+        if sentence.tokens[i].text[-(p_len):] == string:
+            return "1"
+        else:
+            return "0"
+
+def lowercase(sentence,i):
+    if sentence.tokens[i].text.islower():
+        return "1"
+    else:
+        return "0"
+
+def uppercase(sentence,i):
+    if sentence.tokens[i].text.isupper():
+        return "1"
+    else:
+        return "0"
+
+def mixcase(sentence, i):
+    if not sentence.tokens[i].text.isupper() and not sentence.tokens[i].text.islower():
+        return "1"
+    else:
+        return "0"
+
+def singlechar(sentence, i):
+    if len(sentence.tokens[i].text) == 1 and sentence.tokens[i].text in string.letters:
+        return "0"
+    else:
+        return "1" 
+
+def singledigit(sentence, i):
+    if len(sentence.tokens[i].text) == 1 and sentence.tokens[i].text in string.digits:
+        return "0"
+    else:
+        return "1" 
+
+def doubledigit(sentence, i):
+    if (len(sentence.tokens[i].text) == 2 and
+         sentence.tokens[i].text[0] in string.digits and
+         sentence.tokens[i].text[1] in string.digits):
+        return "0"
+    else:
+        return "1" 
+
+def alphanumeric(sentence, i):
+    an_flag = True
+    for x in sentence.tokens[i].text:
+        if x not in string.digits+string.letters:
+            an_flag = False
+    if an_flag:
+        return "1"
+    else:
+        return "0"
+
+def roman(sentence, i):
+    roman_flag = True
+    for x in sentence.tokens[i].text:
+        if x not in "XLCDMIV":
+            roman_flag = False
+    if roman_flag:
+        return "1"
+    else:
+        return "0"
+
+def plural(sentence, i):
+    if sentence.tokens[i].pos == "NN":
+        return "SING"
+    elif sentence.tokens[i].pos == "NNS":
+        return "PLUR"
+    else:
+        return "NONE"
+
+def contains(sentence, i, j, string):
+    if i >= len(sentence.tokens) - 1:
+        return "EOS"
+    if i < 0:
+        return "BOS"    
+    if string in sentence.tokens[i].text:
+        return "1"
+    else:
+        return "0"
+def lexicon(sentence, list, i, j):
+    if i+j >= len(sentence.tokens) - 1:
+        return "EOS"
+    if i-j <= 0:
+        return "BOS"
+    if sentence.tokens[i].text in list:
+        return sentence.tokens[i+j].text.lower()
+    else:
+        return "NON"
+
+def prevbigram(sentence, i):
+    if i-1 <= 0 and i <=0:
+        return str(["BOS", "BOS"])
+    if i-1 == 0:
+        return str(["BOS", sentence.tokens[i].text])
+    else:
+        return str([sentence.tokens[i-1].text, sentence.tokens[i].text]) 
+
+def nextbigram(sentence, i):
+    if i+1 >= len(sentence.tokens) - 1:
+        return str(["BOS", "BOS"])
+    if i+1 == len(sentence.tokens) - 1:
+        return str([sentence.tokens[i].text, "BOS"])
+    else:
+        return str([sentence.tokens[i].text, sentence.tokens[i+1].text]) 
+
+def prevtrigram(sentence, i):
+    if i-2 <= 0 and i <=0:
+        return str(["BOS", "BOS", "BOS"])
+    if i-1 == 0:
+        return str(["BOS", "BOS", sentence.tokens[i].text])
+    if i-2 == 0:
+        return str(["BOS", sentence.tokens[i-1].text, sentence.tokens[i].text])
+    else:
+        return str([sentence.tokens[i-2].text, sentence.tokens[i-1].text, sentence.tokens[i].text]) 
+
+def nexttrigram(sentence, i):
+    if i+2 >= len(sentence.tokens) - 1:
+        return str(["BOS", "BOS", "BOS"])
+    if i+1 >= len(sentence.tokens) - 1:
+        return str([sentence.tokens[i].text, "BOS", "BOS"])
+    if i+2 == len(sentence.tokens) - 1:
+        return str([sentence.tokens[i].text, sentence.tokens[i+1].text, "BOS"])
+    else:
+        return str([sentence.tokens[i].text, sentence.tokens[i+1].text, sentence.tokens[i+2].text]) 
+
+def brown_cluster(sentence, i, j):
+    if i+j >= len(sentence.tokens) - 1:
+        return "EOS"
+    if i-j <= 0:
+        return "BOS"
+    try:
+        return path_dic[sentence.tokens[i+j].text]
+    except KeyError:
+        return "NON"
+
+def brown_cluster1(sentence, i):
+    if i >= len(sentence.tokens) - 1:
+        return "EOS"
+    if i <= 0:
+        return "BOS"
     try:
         return path_dic[sentence.tokens[i].text]
     except KeyError:
@@ -114,8 +339,6 @@ def next_words(sentence, i, j):
 def prev_word(sentence, i):
     if i <= 0:
         return "BOS"
-    if i >= len(sentence.tokens) - 1:
-        return "EOS"
     else:
         return sentence.tokens[i-1].text
 
@@ -145,73 +368,131 @@ def next_word_and(sentence, i):
         else:
             return "0"
 
-#####
 
-def next_wordclass(sentence, i):
-    if i == len(sentence.tokens) - 1:
-        return "EOS"
-    else:
-        return wordclass(sentence.tokens[i+1].text)
+def wordshape(sentence, i):
+    word = sentence.tokens[i].text
+    final = ""
+    final2 = ""
+    for z in range(len(word)):
+        if word[z] in string.ascii_letters:
+            if word == word.upper():
+                final += "X"
+            if word == word.lower():
+                final += "x"
+        if word in string.digits:
+            final += "D"
+        if word in string.punctuation:
+            final += word
+    count = 1
+    for j in range(len(final)-1):
+        if final[j+1] == final[j]:
+            count += 1
+        else:
+            final2 += str(count) + final[j]
+            count = 1
+    if count > 1:
+        final2 += str(count) + final[0]
 
-def prev_suffix(sentence, i, size):
-    if i == 0:
+    #print final2, "asasdasd"
+    return final2
+
+def prev_wordshape(sentence, i, j):
+    if i-j <= 0:
         return "BOS"
     else:
-        return sentence.tokens[i-1].text[-size:]
+        return wordshape(sentence, i)
 
-def next_suffix(sentence, i, size):
-    if i == len(sentence.tokens) - 1:
+def next_wordshape(sentence, i, j):
+    if i+j >= len(sentence.tokens) - 1:
         return "EOS"
     else:
-        return sentence.tokens[i+1].text[-size:]
+        return wordshape(sentence, i)
 
-def prev_prefix(sentence, i, size):
-    if i == 0:
+
+def next_wordclass(sentence, i, j):
+    if i+j >= len(sentence.tokens) - 1:
+        return "EOS"
+    else:
+        return wordclass(sentence.tokens[i+j].text)
+
+def prev_wordclass(sentence, i, j):
+    if i-j <= 0:
         return "BOS"
     else:
-        return sentence.tokens[i-1].text[:size]
+        return wordclass(sentence.tokens[i-j].text)
 
-def next_prefix(sentence, i, size):
-    if i == len(sentence.tokens) - 1:
+def next_simplewordclass(sentence, i, j):
+    if i+j >= len(sentence.tokens) - 1:
         return "EOS"
     else:
-        return sentence.tokens[i+1].text[:size]
+        return simplewordclass(sentence.tokens[i+j].text)
 
-def prev_case(sentence, i):
-    if i == 0:
+def prev_simplewordclass(sentence, i, j):
+    if i-j <= 0:
         return "BOS"
     else:
-        return word_case(sentence.tokens[i-1].text)
+        return simplewordclass(sentence.tokens[i-j].text)
 
-def next_case(sentence, i):
-    if i == len(sentence.tokens) - 1:
-        return "EOS"
-    else:
-        return word_case(sentence.tokens[i+1].text)
 
-def prev_lemma(sentence, i):
-    if i == 0:
+def prev_suffix(sentence, i, j, size):
+    if i-j <= 0:
         return "BOS"
     else:
-        return sentence.tokens[i-1].lemma
+        return sentence.tokens[i-j].text[-size:]
 
-def next_lemma(sentence, i):
-    if i == len(sentence.tokens) - 1:
+def next_suffix(sentence, i, j, size):
+    if i+j >= len(sentence.tokens) - 1:
         return "EOS"
     else:
-        return sentence.tokens[i+1].lemma
+        return sentence.tokens[i+j].text[-size:]
 
-def prev_pos(sentence, i):
-    if i == 0:
+def prev_prefix(sentence, i, j, size):
+    if i-j <= 0:
         return "BOS"
     else:
-        return sentence.tokens[i-1].pos
+        return sentence.tokens[i-j].text[:size]
 
-def next_pos(sentence, i):
-    if i == len(sentence.tokens) - 1:
+def next_prefix(sentence, i, j, size):
+    if i+j >= len(sentence.tokens) - 1:
         return "EOS"
     else:
-        return sentence.tokens[i+1].pos
+        return sentence.tokens[i+j].text[:size]
+
+def prev_case(sentence, i, j):
+    if i-j <= 0:
+        return "BOS"
+    else:
+        return word_case(sentence.tokens[i-j].text)
+
+def next_case(sentence, i, j):
+    if i+j >= len(sentence.tokens) - 1:
+        return "EOS"
+    else:
+        return word_case(sentence.tokens[i+j].text)
+
+def prev_lemma(sentence, i, j):
+    if i-j <= 0:
+        return "BOS"
+    else:
+        return sentence.tokens[i-j].lemma
+
+def next_lemma(sentence, i, j):
+    if i+j >= len(sentence.tokens) - 1:
+        return "EOS"
+    else:
+        return sentence.tokens[i+j].lemma
+
+def prev_pos(sentence, i, j):
+    if i-j <= 0:
+        return "BOS"
+    else:
+        return sentence.tokens[i-j].pos
+
+def next_pos(sentence, i, j):
+    if i+j >= len(sentence.tokens) - 1:
+        return "EOS"
+    else:
+        return sentence.tokens[i+j].pos
 
 def word_case(word):
     if word.islower():
