@@ -14,6 +14,9 @@ from text.token2 import Token2
 from text.pair import Pair, Pairs
 
 from text.tlink import TLink
+from other.dictionary import Dictionary, stopwords, removewords, go_words
+
+gazette = Dictionary()
 
 whitespace = [u"\u2002", u"\u2003", u"\u00A0", u"\u2009", u"\u200C", u"\u200D",
               u'\u2005', u'\u2009', u'\u200A']
@@ -92,6 +95,7 @@ class Document(object):
                 'ssplit.eolonly': True,
                 # 'annotators': 'tokenize,ssplit,pos,depparse,parse',
                 'annotators': 'tokenize,ssplit,pos,parse,ner,lemma,depparse',
+                'gazetteer': '/scr/nlp/data/machine-reading/Machine_Reading_P1_Reading_Task_V2.0/data/SportsDomain/NFLScoring_UseCase/NFLgazetteer.txt',
                 'outputFormat': 'json',
             })
             if isinstance(corenlpres, basestring):
@@ -99,6 +103,7 @@ class Document(object):
                 corenlpres = corenlpserver.annotate(s.text.encode("utf8"), properties={
                 'ssplit.eolonly': True,
                 # 'annotators': 'tokenize,ssplit,pos,depparse,parse',
+                'nfl.gazetteer': '/scr/nlp/data/machine-reading/Machine_Reading_P1_Reading_Task_V2.0/data/SportsDomain/NFLScoring_UseCase/NFLgazetteer.txt',
                 'annotators': 'tokenize,ssplit,pos,ner,lemma',
                 'outputFormat': 'json',
             })
@@ -249,12 +254,23 @@ class Document(object):
             print s.tokens[0].dstart <= start, s.tokens[-1].dend >= end, s.tokens[0].dstart, s.tokens[-1].dend, s.text
         return None
 
-    def get_offsets(self, esource, ths, rules):
+    def get_offsets(self, esource, ths, rules, off_list=None):
+        #print esource
+
         offsets = []
         for s in self.sentences:
-            if s.entities:
-                offsets += s.entities.get_offsets(esource, ths, rules)
-        return offsets
+            #print s.text
+            offies = gazette.easy_search_terms(s, esource, ths, rules, off_list)
+            if len(offies) == 1:
+                offsets += offies #Check it doesn't affect normal results
+            else:
+                if s.entities:                   
+                    offsets += s.entities.get_offsets2(esource, ths, rules)
+                    offsets += offies
+
+
+        return list(set(offsets))
+
 
     def get_entity(self, eid, source="goldstandard"):
         for sentence in self.sentences:

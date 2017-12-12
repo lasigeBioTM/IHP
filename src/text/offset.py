@@ -89,6 +89,7 @@ class Offsets(object):
         toadd = True
         for oi, oo in enumerate(self.offsets):
             over = o.overlap(oo)
+            #print exclude_this_if, exclude_others_if, over, "---", o.start, o.end, o.text, "///", oi, oo.start, oo.end, oo.text
             if over in exclude_this_if:
                 toadd = False
                 v = over

@@ -90,6 +90,7 @@ class Corpus(object):
         :param esources:
         :return: List of tuple : (did, start, end, text)
         """
+        
         offsets = {} # {did1: [(0,5), (10,14)], did2: []...}
         for did in self.documents:
             offsets[did] = self.documents[did].get_offsets(esource, ths, rules)
@@ -97,6 +98,8 @@ class Corpus(object):
         for did in offsets:
             for o in offsets[did]:
                 offsets_list.append((did, o[0], o[1], o[2]))
+                #print did, o[0], o[1], o[2]
+
         return offsets_list
 
 

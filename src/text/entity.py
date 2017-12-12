@@ -3,8 +3,7 @@ from __future__ import division, absolute_import, unicode_literals
 import xml.etree.ElementTree as ET
 import logging
 from text.offset import Offset, Offsets, perfect_overlap, contained_by
-
-
+  
 class Entity(object):
     """Base entity class"""
 
@@ -15,10 +14,11 @@ class Entity(object):
         self.sid = kwargs.get("sid", None)
         self.eid = kwargs.get("eid")
         self.tokens = tokens
-        self.start = tokens[0].start
-        self.end = tokens[-1].end
-        self.dstart = tokens[0].dstart
-        self.dend = tokens[-1].dend
+        if len(tokens) > 0:
+            self.start = tokens[0].start
+            self.end = tokens[-1].end
+            self.dstart = tokens[0].dstart
+            self.dend = tokens[-1].dend
         self.exclude = None
         self.dexclude = None
         self.recognized_by = []
@@ -26,9 +26,11 @@ class Entity(object):
         self.targets = [] # targets should be (eid, relationtype)
         self.score = kwargs.get("score", 0)
         self.original_id = kwargs.get("original_id")
+        self.normalized = self.text
+        self.normalized_score = 0
+        self.normalized_ref = "text"
         # logging.info("created entity {} with score {}".format(self.text, self.score))
         # print "entity", args, kwargs
-
 
     def __str__(self):
         output = "{}, s-offset: {}:{}, d-offset: {}:{}, tokens: {}, type: {}".format(self.text, self.start, self.end,
@@ -124,6 +126,18 @@ class Entities(object):
                         entities.add((e.text,))
         return entities
 
+        #             for new_e in val: # validate should return a list of entities
+        #                 eid_offset = Offset(new_e.dstart, new_e.dend, text=new_e.text, sid=new_e.sid)
+        #                 exclude = [perfect_overlap]
+        #                 if "contained_by" in rules:
+        #                     exclude.append(contained_by)
+        #                 toadd, v, overlaping, to_exclude = offsets.add_offset(eid_offset, exclude_this_if=exclude, exclude_others_if=[])
+        #                 # print toadd, v, overlaping, to_exclude, new_e.normalized
+        #                 if toadd:
+        #                     # entities[new_e.text] = []
+        #                     entities[new_e.normalized] = []
+        # # print entities
+        # return entities
 
     def write_chemdner_results(self, source, outfile, ths={"ssm":0.0}, rules=[], totalentities=0):
         """
@@ -217,6 +231,7 @@ class Entities(object):
         spans = []
         offsets = Offsets()
         for s in self.elist:
+            #print "******", s, esource
             # logging.info("{}".format(s))
             # logging.info("esource: {}".format(es))
             if s.startswith(esource):
@@ -230,12 +245,16 @@ class Entities(object):
                     exclude = [perfect_overlap]
                     if "contained_by" in rules:
                         exclude.append(contained_by)
+                    #print "********", eid_offset.start, eid_offset.end, eid_offset.text
                     toadd, v, overlapped, to_exclude = offsets.add_offset(eid_offset, exclude_this_if=exclude, exclude_others_if=[])
+                    #print toadd, v
+                    #print e.dstart, e.dend, e.text
                     if toadd:
+                        #logging.debug("added {}".format(e.text))
                         spans.append((e.dstart, e.dend, e.text))
                         # logging.info("added {}".format(e.text))
-                    else:
-                        logging.debug("did not add {}".format(e.text))
+                    #else:
+                        #logging.debug("did not add {}".format(e.text))
         return spans
 
     def get_entity(self, eid, source="goldstandard"):
@@ -243,3 +262,48 @@ class Entities(object):
             if e.eid == eid:
                 return e
         print "entity not found:", eid, source
+
+
+    def get_offsets2(self, esource, ths, rules):
+        spans = []
+        offsets = Offsets()
+        new_entities = []
+        for s in self.elist:
+            if s.startswith(esource):
+                for e in self.elist[s]:
+                    new_entities.append(e)
+                    validated_entity = self.validate(e, ths, rules) #possibly make it as a list
+                    if validated_entity != None:           
+                        eid = self.sid + ".e" + str(len(self.elist[esource]))
+                        new_entity = Entity(validated_entity[1], e.sid, text=validated_entity[0], did=e.did, #score=score,
+                                            type=e.type, eid=eid)
+                        new_entity.type = e.type
+                        new_entities.append(new_entity)
+
+                    for new_e in new_entities:
+                        eid_offset = Offset(new_e.dstart, new_e.dend, text=new_e.text, sid=new_e.sid)
+                        exclude = [perfect_overlap]
+                        if "contained_by" in rules:
+                            exclude.append(contained_by)
+                        toadd, v, overlapped, to_exclude = offsets.add_offset(eid_offset, exclude_this_if=exclude, exclude_others_if=[])
+                        if toadd:
+                            spans.append((new_e.dstart, new_e.dend, new_e.text))
+        return spans
+
+
+    def validate(self, entity, ths, rules):
+        if "andor" in rules:
+            terms = []
+            words = entity.text.split(" ")
+            if "and" in words:
+                smaller_entity = " ".join(words[:words.index("and")])
+                token_list = entity.tokens[:words.index("and")]
+                if len(smaller_entity.split(" ")) > 1:
+                    return (smaller_entity, token_list)
+            if "or" in words:
+                smaller_entity = " ".join(words[:words.index("or")])
+                token_list = entity.tokens[:words.index("or")]
+                if len(smaller_entity.split(" ")) > 1:
+                    return (smaller_entity, token_list)
+        else:
+            return None

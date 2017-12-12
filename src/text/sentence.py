@@ -6,7 +6,7 @@ from xml.etree import ElementTree as ET
 import re
 import pprint
 from classification.ner.stanfordner import stanford_coding
-from text.protein_entity import ProteinEntity
+#from text.protein_entity import ProteinEntity
 
 from token2 import Token2
 from entity import Entities
@@ -15,7 +15,7 @@ from text.pair import Pair, Pairs
 from classification.rext import ddi_kernels
 from classification.rext import relations
 from text.chemical_entity import ChemicalEntity
-from text.mirna_entity import MirnaEntity
+#from text.mirna_entity import MirnaEntity
 from text.event_entity import EventEntity
 from text.time_entity import TimeEntity
 from text.tlink import TLink
@@ -189,13 +189,15 @@ class Sentence(object):
                 newtext = self.text[tlist[0].start:tlist[-1].end]
             if entity:
                 entity.text = newtext
+
             if "text" in kwargs and newtext != kwargs["text"]:
                 if newtext not in kwargs["text"] and kwargs["text"] not in newtext:
+                    print start, end, "***************", newtext, "+++++", kwargs["text"]
                     logging.info("text does not match: {}=>{}".format(newtext, kwargs["text"]))
-                    print exclude, self.text[tlist[0].start:tlist[-1].end]
-                    print self.text[tlist[0].start:exclude[0][0]]
-                    print self.text[exclude[0][0]:exclude[0][1]]
-                    print self.text[exclude[0][1]:tlist[-1].end]
+                    print exclude, self.text[tlist[0].start:tlist[-1].end] 
+                    #print self.text[tlist[0].start:exclude[0][0]] #Fails if exclude is None
+                    #print self.text[exclude[0][0]:exclude[0][1]]
+                    #print self.text[exclude[0][1]:tlist[-1].end]
 
                     # return None
                 else:

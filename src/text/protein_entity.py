@@ -5,10 +5,14 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '../..'))
-from config.config import go_conn as db
 from config import config
 from text.entity import Entity
 from text.token2 import Token2
+
+db = ""
+from config.config import use_go
+if use_go == "true":
+  from config.config import go_conn as db
 
 __author__ = 'Andre'
 prot_words = set()
@@ -58,6 +62,7 @@ class ProteinEntity(Entity):
                     stop = True
             if stop:
                 return False
+                
         if "alpha" in rules and not self.text[0].isalpha():
             logging.debug("not alpha %s" % self.text)
             return False
