@@ -17,6 +17,35 @@ class HPODocument(Document):
         if process:
             self.process_document(doctype)
 
+    # def sentence_tokenize(self, doctype):
+    #     """
+    #     Split the document text into sentences, add to self.sentences list
+    #     :param doctype: Can be used in the future to choose different methods
+    #     """
+    #     # first sentence should be the title if it exists
+    #     a = 1
+    #     if self.title:
+    #         a = 0
+    #         sid = self.did + ".s0"
+    #         self.sentences.append(HPOSentence(self.title, sid=sid, did=self.did))
+    #     # inputtext = clean_whitespace(self.text)
+    #     inputtext = self.text
+    #     with codecs.open("/tmp/geniainput.txt", 'w', 'utf-8') as geniainput:
+    #         geniainput.write(inputtext)
+    #     current_dir = os.getcwd()
+    #     os.chdir(geniass_path)
+    #     geniaargs = ["./geniass", "/tmp/geniainput.txt", "/tmp/geniaoutput.txt"]
+    #     Popen(geniaargs, stdout=PIPE, stderr=PIPE).communicate()
+    #     os.chdir(current_dir)
+    #     offset = 0
+    #     with codecs.open("/tmp/geniaoutput.txt", 'r', "utf-8") as geniaoutput:
+    #         for l in geniaoutput:
+    #             stext = l.strip()
+    #             sid = self.did + ".s" + str(len(self.sentences) + a) ######### CAN THIS HAPPEN?
+    #             self.sentences.append(HPOSentence(stext, offset=offset, sid=sid, did=self.did))
+    #             offset += len(stext)
+    #             offset = self.get_space_between_sentences(offset)
+
     def tag_hpo_entity(self, start, end, **kwargs):
         """
         Create an HPO entity relative to this document. It iterates the sentences
