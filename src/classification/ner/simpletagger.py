@@ -31,6 +31,7 @@ nouns = ["syndrome", "patients", "mutations", "gene", "nf2", "chromosome", "case
 
 feature_extractors = {
                     #Linguistic Features
+                      "word": lambda x, i: x.tokens[i].text,
                       "lemma": lambda x, i: x.tokens[i].lemma,
                       "postag": lambda x, i: x.tokens[i].pos,
 
