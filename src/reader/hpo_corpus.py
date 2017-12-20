@@ -6,6 +6,7 @@ import glob
 import os
 
 from text.corpus import Corpus
+#from text.document import Document
 from text.hpo_document import HPODocument
 from other.dictionary import stopwords, removewords, go_words, definingwords, good_nouns
 
@@ -195,80 +196,94 @@ class HPOCorpus(Corpus):
 
 
 	def validate_corpus(self, offsets_list, rules):
+		#offa = [str(x[3].encode("utf-8")) for x in to_remove] #List of terms to be passed for second validation
+		#print "neurofibromatosis" in offa
 		to_remove = []
-		if "gen_rules" in rules:
+		if "gen_rules" in rules and "removal" in rules:
 			for offset in offsets_list:
-				if str(offset[3].encode("utf-8")).lower() in stopwords:
-					to_remove.append(offset)
-				for word in removewords:
-					for w in go_words:
-						if word.lower() in str(offset[3].encode("utf-8").lower()) and w.lower() not in str(offset[3].encode("utf-8").lower()):
-							try:
+				if "stopwords" in rules:
+					if str(offset[3].encode("utf-8")).lower() in stopwords:
+						to_remove.append(offset)
+					for word in removewords:
+						for w in go_words:
+							if word.lower() in str(offset[3].encode("utf-8").lower()) and w.lower() not in str(offset[3].encode("utf-8").lower()):
+								try:
+									to_remove.append(offset)
+								except ValueError:
+									pass
+
+				if "gen_errors" in rules:
+					#Remove entities smaller than 3 characters
+					if len(str(offset[3].encode("utf-8")).lower()) < 3:
+						print "small length removed", offset
+						to_remove.append(offset)
+
+					#Remove words that only have one double-quote or parenthesis
+					try:
+						if '"' in str(offset[3].encode("utf-8")).lower():
+							if str(offset[3].encode("utf-8")).lower().count('"') == 1:
+								print "qt removed", offset
 								to_remove.append(offset)
-							except ValueError:
-								pass
-				#Remove entities smaller than 3 characters
-				if len(str(offset[3].encode("utf-8")).lower()) < 3:
-					print "small length removed", offset
-					to_remove.append(offset)
-
-				#Remove words that only have one double-quote or parenthesis
-				try:
-					if '"' in str(offset[3].encode("utf-8")).lower():
-						if str(offset[3].encode("utf-8")).lower().count('"') == 1:
-							print "qt removed", offset
+						if ')' in str(offset[3].encode("utf-8")).lower() or '(' in str(offset[3].encode("utf-8")).lower():
+							cou = str(offset[3].encode("utf-8")).lower().count(')') + str(offset[3].encode("utf-8")).lower().count('(')
+							if cou != 2:
+								print "qt removed", offset
+								to_remove.append(offset)							
+					except UnicodeDecodeError:
+						pass
+					
+					#Remove entities that have less than 3 words and that include "type" or "group"
+					flag = False
+					for word in definingwords:
+						if word in str(offset[3].encode("utf-8")).lower():
+							flag = True
+					if flag:
+						if len(str(offset[3].encode("utf-8")).split(" ")) < 3:
+							print "defword removed", offset
 							to_remove.append(offset)
-					if ')' in str(offset[3].encode("utf-8")).lower() or '(' in str(offset[3].encode("utf-8")).lower():
-						cou = str(offset[3].encode("utf-8")).lower().count(')') + str(offset[3].encode("utf-8")).lower().count('(')
-						if cou != 2:
-							print "qt removed", offset
-							to_remove.append(offset)							
-				except UnicodeDecodeError:
-					pass
-				
-				#Remove entities that have less than 3 words and that include "type" or "group"
-				flag = False
-				for word in definingwords:
-					if word in str(offset[3].encode("utf-8")).lower():
-						flag = True
-				if flag:
-					if len(str(offset[3].encode("utf-8")).split(" ")) < 3:
-						print "defword removed", offset
+
+					#Remove entities that contain digits
+					try:
+						for x in str(offset[3].encode("utf-8")).split(" "):
+							flags = [False for a in range(len(x))]
+							for i in range(len(x)):
+								flags[i] = x[i] in "0123456789," #",.;:!?." in there because might be after number
+							digflag = True
+							for f in flags:
+								if f == False:
+									digflag = False
+							if digflag == True:
+								print "digits removed", offset
+								to_remove.append(offset)
+					except UnicodeDecodeError:
+						pass
+
+
+					#Removes Entities that have 2 of the go words because it doesn't really happen.
+					go_count = 0
+					for word in go_words:
+						if (word == str(offset[3].encode("utf-8")).lower().split(" ")[0] or
+						word == str(offset[3].encode("utf-8")).lower().split(" ")[-1]):
+							go_count += 1
+					if go_count > 1:
+						print "gowords removed", offset
 						to_remove.append(offset)
 
-				#Remove entities that contain digits
-				try:
-					for x in str(offset[3].encode("utf-8")).split(" "):
-						flags = [False for a in range(len(x))]
-						for i in range(len(x)):
-							flags[i] = x[i] in "0123456789," #",.;:!?." in there because might be after number
-						digflag = True
-						for f in flags:
-							if f == False:
-								digflag = False
-						if digflag == True:
-							print "digits removed", offset
-							to_remove.append(offset)
-				except UnicodeDecodeError:
-					pass
-
-
-				#Removes Entities that have 2 of the go words because it doesn't really happen.
-				go_count = 0
-				for word in go_words:
-					if (word == str(offset[3].encode("utf-8")).lower().split(" ")[0] or
-					word == str(offset[3].encode("utf-8")).lower().split(" ")[-1]):
-						go_count += 1
-				if go_count > 1:
-					print "gowords removed", offset
-					to_remove.append(offset)
-
-				#Removes entities that are smaller than 3 and coontain a positive noun. Since we're dealing with disorders
-				#It's necessary to have at least 3 words to give a negative connotaction to positive nouns
-				for noun in good_nouns:
-					if noun in str(offset[3].encode("utf-8")) and len(str(offset[3].encode("utf-8")).split(" ")) < 3:
-						print "good_nouns word removed", offset
+					#Removes Entities that contain 2 words and have a comma
+						# if str(offset[3].encode("utf-8")).count(",") == 1 and str(offset[3].encode("utf-8")).count("and") == 1:
+						# 	print "and_comma removed", offset
+						# 	to_remove.append(offset)
+					if len(str(offset[3].encode("utf-8")).split(" ")) <= 2 and "," in str(offset[3].encode("utf-8")):
+						print offset
 						to_remove.append(offset)
+
+				if "negcon" in rules:
+					#Removes entities that are smaller than 3 and coontain a positive noun. Since we're dealing with disorders
+					#It's necessary to have at least 3 words to give a negative connotaction to positive nouns
+					for noun in good_nouns:
+						if noun in str(offset[3].encode("utf-8")) and len(str(offset[3].encode("utf-8")).split(" ")) < 3:
+							print "good_nouns word removed", offset
+							to_remove.append(offset)
 
 				# if "check_nouns" in rules:
 				# 	if len(str(offset[3].encode("utf-8")).split(" ")) > 2 and str(offset[3].encode("utf-8")).lower().strip() not in ann_gaz:
@@ -299,15 +314,6 @@ class HPOCorpus(Corpus):
 								#smaller_entities.add(a)
 					#for x in smaller_entities:
 					#	sentence_terms.remove(x)
-
-				#Removes Entities that contain 2 words and have a comma
-					# if str(offset[3].encode("utf-8")).count(",") == 1 and str(offset[3].encode("utf-8")).count("and") == 1:
-					# 	print "and_comma removed", offset
-					# 	to_remove.append(offset)
-
-				if len(str(offset[3].encode("utf-8")).split(" ")) <= 2 and "," in str(offset[3].encode("utf-8")):
-					print offset
-					to_remove.append(offset)
 
 				if "lastwords" in rules:
 					from pycorenlp import StanfordCoreNLP
@@ -388,6 +394,8 @@ def hpo_get_gold_ann_set(goldpath): #goldann="corpora/hpo/test_ann"
 		   # goldlist.append((pmid, doct + ":" + start + ":" + end, '1'))
 			goldlist.append((pmid, int(start), int(end), text))
 
+	#print goldlist[0:2]
 	goldset = set(goldlist)
+	#print goldset
 	return goldset, None
 

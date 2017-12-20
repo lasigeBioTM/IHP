@@ -203,5 +203,7 @@ def tsuite_get_gold_ann_set(goldpath): #goldann="corpora/hpo/test_ann"
 						pmid = file.split("/")[-1] + "." + title + "." + str(i)
 						goldlist.append((pmid, int(start), int(end), text))
 
+	#print goldlist[0:2]
 	goldset = set(goldlist)
+	#print goldset
 	return goldset, None
