@@ -27,7 +27,7 @@ from postprocessing.ensemble_ner import EnsembleNER
 from classification.results import ResultsNER
 
 from pycorenlp import StanfordCoreNLP
-
+#from other.translator import translation
 
 same_flag = [False]
 
@@ -272,8 +272,13 @@ def get_results(results, models, gold_offsets, ths, rules, compare_text=True):
     :param ths: Validation thresholds
     :param rules: Validation rules
     """
-
+    #for doc in results.corpus.documents:
+    #    for sentence in results.corpus.documents[doc].sentences:
+    #        #print sentence.sid, sentence.text
+    #       sentence.entities.validate_entities(models, rules, ths)
     offsets = results.corpus.get_offsets(models, ths, rules)
+
+
 
     # logging.debug(offsets)
     for o in offsets:
@@ -282,6 +287,7 @@ def get_results(results, models, gold_offsets, ths, rules, compare_text=True):
             sys.exit()
     if not compare_text: #e.g. gold standard does not include the original text
         offsets = [(o[0], o[1], o[2], "") for o in offsets]
+    # logging.info("system entities: {}; gold entities: {}".format(offsets, gold_offsets))
     reportlines, tps, fps, fns = compare_results(set(offsets), gold_offsets, results.corpus, getwords=compare_text)
 
     with codecs.open(results.path + "_report.txt", 'w', "utf-8") as reportfile:
@@ -301,6 +307,21 @@ def get_results(results, models, gold_offsets, ths, rules, compare_text=True):
     print "Precision: {}".format(precision)
     print "Recall: {}".format(recall)
 
+    with codecs.open(results.path + "_report_ALL.txt", 'a', "utf-8") as reportfile:
+        print "writing report to {}_report.txt".format(results.path)
+        reportfile.write("TPs: {!s}\nFPs: {!s}\nFNs: {!s}\n".format(len(tps), len(fps), len(fns)))
+        reportfile.write(">\n")
+        if len(tps) == 0:
+            precision = 0
+            recall = 0
+        else:
+            precision = len(tps)/(len(tps) + len(fps))
+            recall = len(tps)/(len(tps) + len(fns))
+        reportfile.write("Precision: {!s}\nRecall: {!s}\n".format(precision, recall))
+        reportfile.write(">\n")
+        for line in reportlines:
+            reportfile.write(line + '\n')
+
     a = open("data/fps.txt", "a")
     aa = open("data/fps_same_terms.txt", "a")
     b = open("data/fns.txt", "a")
@@ -309,6 +330,9 @@ def get_results(results, models, gold_offsets, ths, rules, compare_text=True):
     a.write("Precision: {!s}\nRecall: {!s}\n".format(precision, recall))
     b.write("Precision: {!s}\nRecall: {!s}\n".format(precision, recall))
 
+
+
+    # doc_num, type, start, end, text, in_gaz
     ll = []
     gg = []
     
@@ -323,14 +347,66 @@ def get_results(results, models, gold_offsets, ths, rules, compare_text=True):
         if str(line).strip() not in gg:
             a.write(line.lower() + "\n")
         else:
-            aa.write(line.lower() + "\n")
+
+            aa.write(line.lower() + "\n") #use these
+
+    #print reportlines
+    #or aaaaa in reportlines:
+    #    print aaaaa
+
+
+
 
     for x in fns:
         b.write(str(x[3].encode("utf-8")).strip().lower() + "\n")
     a.close()
     b.close()
-    
     return precision, recall
+
+def trans(off_list, rules, GG_out, MS_out):
+    if "translation" in rules:
+        translated_gg = open(GG_out, "a")
+        translated_ms = open(MS_out, "a")
+        text_offsets = [str(off[3].encode("utf-8")) for off in off_list]
+        total_translated = []
+        #print len(text_offsets)
+        #print text_offsets
+        size_of_lists = int(len(text_offsets)/10)
+        remaining = len(text_offsets)%10
+        a = 0
+        #print size_of_lists, remaining
+        for j in range(1,11):
+            #print a, j*size_of_lists
+            list_x = text_offsets[a:j*size_of_lists]
+            a += size_of_lists
+
+            list_of_terms, ms_pt, ms_en, gg_pt, gg_en = translation(list_x)
+            total_translated += list(gg_en)
+            #total_translated += ms_en
+            for i in range(len(list_of_terms)):
+                flag_gg = True
+                flag_ms = True
+                if list_of_terms[i].encode("utf-8") != gg_en[i].encode("utf-8"):
+                    flag_gg = False
+                if list_of_terms[i].encode("utf-8") != ms_en[i].encode("utf-8"):
+                    flag_ms = False
+                translated_gg.write("{}\t{}\t{}\t{}\n".format(list_of_terms[i].encode("utf-8"), gg_pt[i].encode("utf-8"), gg_en[i].encode("utf-8"), str(flag_gg)))
+                translated_ms.write("{}\t{}\t{}\t{}\n".format(list_of_terms[i].encode("utf-8"), ms_pt[i].encode("utf-8"), ms_en[i].encode("utf-8"), str(flag_ms)))
+        
+        list_x = text_offsets[a:a+remaining]
+        list_of_terms, ms_pt, ms_en, gg_pt, gg_en = translation(list_x)
+        total_translated += list(gg_en)
+        #total_translated += ms_en
+        for i in range(len(list_of_terms)):
+            flag_gg = True
+            flag_ms = True
+            if list_of_terms[i] != gg_en[i]:
+                flag_gg = False
+            if list_of_terms[i] != ms_en[i]:
+                flag_ms = False
+            translated_gg.write("{}\t{}\t{}\t{}\n".format(list_of_terms[i].encode("utf-8"), gg_pt[i].encode("utf-8"), gg_en[i].encode("utf-8"), str(flag_gg)))
+            translated_ms.write("{}\t{}\t{}\t{}\n".format(list_of_terms[i].encode("utf-8"), ms_pt[i].encode("utf-8"), ms_en[i].encode("utf-8"), str(flag_ms)))
+
 
 def main():
     start_time = time.time()
