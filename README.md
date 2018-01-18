@@ -43,3 +43,7 @@ Rules can be added to the evaluation parameters:
 ```
    --rules andor stopwords small_ent twice_validated stopwords gowords posgowords longterms small_len quotes defwords digits lastwords
    ```
+
+## References: 
+
+- M. Lobo, A. Lamurias, and F. Couto, “Identifying human phenotype terms by combining machine learning and validation rules,” BioMed Research International, vol. 2017, pp. 1--14, 2017 (https://doi.org/10.1155/2017/8565739)
