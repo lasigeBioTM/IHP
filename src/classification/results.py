@@ -101,7 +101,7 @@ class ResultsNER(object):
 
     def load_corpus(self, goldstd):
         logging.info("loading corpus %s" % config.paths[goldstd]["corpus"])
-        file = open(paths[goldstd]["corpus"], 'rb')
+        file = open(config.paths[goldstd]["corpus"], 'rb')
         corpus = pickle.load(file)
         for did in corpus.documents:
             for sentence in corpus.documents[did].sentences:
