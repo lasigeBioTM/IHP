@@ -35,10 +35,10 @@ from reader.mirna_corpus import MirnaCorpus
 from reader.mirtext_corpus import MirtexCorpus
 from reader.pubmed_corpus import PubmedCorpus
 from reader.tempEval_corpus import TempEvalCorpus
-from .reader.transmir_corpus import TransmirCorpus
-from .reader.hpo_corpus import HPOCorpus ######### 
-from .reader.test_suite import SuiteCorpus #######
-from .text.corpus import Corpus
+from reader.transmir_corpus import TransmirCorpus
+from reader.hpo_corpus import HPOCorpus ######### 
+from reader.test_suite import SuiteCorpus #######
+from text.corpus import Corpus
 
 if config.use_chebi:
     pass
