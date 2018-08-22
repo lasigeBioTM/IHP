@@ -8,7 +8,7 @@ import tarfile
 import time
 from optparse import OptionParser
 
-import kernelmodels
+from . import kernelmodels
 
 TRUE_DDI = 'trueDDI'
 #shallow linguist kernel prediction using jsre
@@ -67,9 +67,9 @@ def train(docs, kernelpairs, classifiers, dditype="all", tag="", backup=False):
                                 dditype=dditype, excludesentences=excludesentences)
         tempfiles.append("ddi_models/" + tag + "ddi_train_sst.model")
         logging.info("done.")
-    print tag + " training complete"
+    print(tag + " training complete")
     if backup:
-        print "backing up these files:", tempfiles
+        print("backing up these files:", tempfiles)
         backupFiles("train_results_", tempfiles)
     return tempfiles
 
@@ -162,7 +162,7 @@ def main():
 
     for c in options.use.split(' '):
         if c not in allclassifiers:
-            print "unknown classifier:", c
+            print("unknown classifier:", c)
             sys.exit()
 
     #print "using:", options.use.split(' ')
@@ -172,18 +172,18 @@ def main():
     logging.info("finished loading data")
     dditypes = options.types.split(" ")
 
-    print "=============================================================="
-    print "experimental conditions:"
-    print "action=" + options.action, "classifiers=" + options.use,
-    print "nfolds=" + str(options.nfolds), "vote=" + str(options.vote),
-    print "lowmax=" + str(options.lowmax), "backup=" + str(options.backup)
-    print "ddi types=" + options.types, "results=", options.res
-    print options.extra
+    print("==============================================================")
+    print("experimental conditions:")
+    print("action=" + options.action, "classifiers=" + options.use, end=' ')
+    print("nfolds=" + str(options.nfolds), "vote=" + str(options.vote), end=' ')
+    print("lowmax=" + str(options.lowmax), "backup=" + str(options.backup))
+    print("ddi types=" + options.types, "results=", options.res)
+    print(options.extra)
     sys.stdout.flush()
 
     if options.res:
         usedclassifiers = set()
-        print "loading results " + options.res
+        print("loading results " + options.res)
         prevres = pickle.load(open(options.res, 'rb'))
         for p in allpairs:
             if p in prevres:
@@ -193,8 +193,8 @@ def main():
                         usedclassifiers.add(cl)
                         allpairs[p][cl] = prevres[p][cl]
             else:
-                print "could not find %s in the results loaded" % p
-        print "used these classifiers from results pickle:" + ' '.join(usedclassifiers)
+                print("could not find %s in the results loaded" % p)
+        print("used these classifiers from results pickle:" + ' '.join(usedclassifiers))
 
     if options.action == "loadcorpus":
         sys.exit()
@@ -235,7 +235,7 @@ def main():
         features = options.use.split(" ")
     else:
         features = "all"
-    print features
+    print(features)
     ddi_types.getTypePredictions(allpairs, docs, kernelpairs,
                                  method=options.ensemble, vote=options.vote,
                                  classifiers=features, source=options.dir)

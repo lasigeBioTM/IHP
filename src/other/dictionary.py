@@ -110,9 +110,9 @@ corenlp_client = StanfordCoreNLP('http://localhost:9000')
 
 class Dictionary():
 	def __init__(self):
-		self.list_of_terms = open("data/gazette.txt").readlines()
+		self.list_of_terms = open("data/gazette.txt", encoding='utf-8').readlines()
 		self.term_dic = {}
-		annotation_gazette = open("data/annotation_gazette.txt").readlines()
+		annotation_gazette = open("data/annotation_gazette.txt", encoding='utf-8').readlines()
 
 		for x in self.list_of_terms + annotation_gazette:
 			term = x.strip().lower()
@@ -219,7 +219,7 @@ class Dictionary():
 				if "exact" in rules:
 				#Exact match recognition versus gazette
 					tok = str(sentence.tokens[i].text.encode("utf-8").lower().strip())
-					if tok in reduced_term_dic.keys():
+					if tok in list(reduced_term_dic.keys()):
 						for term in reduced_term_dic[tok]:
 							term_tokens = nltk.word_tokenize(term.lower().replace("/", " / ").replace("-", " - ").replace('"', ' " '))
 							start_index = i
@@ -293,7 +293,7 @@ class Dictionary():
 
 					#Go Words
 					go_flag = False
-					if tok in reduced_term_dic.keys():
+					if tok in list(reduced_term_dic.keys()):
 						if tok in go_words:
 							for word in go_words:
 								term = str(sentence.tokens[i-1].text.encode("utf-8").lower().strip()) + " " + word
@@ -307,7 +307,7 @@ class Dictionary():
 							sentence_terms_text.append(term.strip())
 
 					#Checks if sentence is composed by only one entity - Reduces precision due to corpus annotations
-					if tok in reduced_term_dic.keys():
+					if tok in list(reduced_term_dic.keys()):
 						for term in reduced_term_dic[tok]:
 							if tok == term:
 								start = sentence.tokens[i].dstart
@@ -326,13 +326,13 @@ class Dictionary():
 					found_entities = {}
 					for term in [x[2].lower() for x in sentence_terms] + sentence_entities:
 						term_tokens = nltk.word_tokenize(term.lower().replace("/", " / ").replace("-", " - "))
-						if term_tokens[0] not in found_entities.keys():
+						if term_tokens[0] not in list(found_entities.keys()):
 							found_entities[term_tokens[0]] = []
 						found_entities[term_tokens[0]].append(term)
 					for term in found_entities:
 						found_entities[term] = set(list(found_entities[term]))
 
-					if tok in found_entities.keys():
+					if tok in list(found_entities.keys()):
 						for term in found_entities[tok]:
 							term_tokens = nltk.word_tokenize(term.lower().replace("/", " / ").replace("-", " - "))
 							start_index = i
@@ -422,7 +422,7 @@ class Dictionary():
 										if str(tok2) in go_words:
 											for word in go_words:
 												join_tok = str(tok1) + " " + word
-											if str(sentence.tokens[start_index].text.encode("utf-8")).lower() in reduced_term_dic.keys():
+											if str(sentence.tokens[start_index].text.encode("utf-8")).lower() in list(reduced_term_dic.keys()):
 												if join_tok in reduced_term_dic[str(sentence.tokens[start_index].text.encode("utf-8")).lower()]:
 													term_flag = True
 										if term_flag:

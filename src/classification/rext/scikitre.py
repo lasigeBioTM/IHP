@@ -178,7 +178,7 @@ class ScikitRE(ReModel):
         try:
             self.text_clf = self.text_clf.fit(self.features, self.labels)
         except ValueError:
-            print "error training {}".format(self.modelname)
+            print("error training {}".format(self.modelname))
             return
         if not os.path.exists(self.basedir + self.modelname):
             os.makedirs(self.basedir + self.modelname)
@@ -193,7 +193,7 @@ class ScikitRE(ReModel):
         feature_names = self.text_clf.named_steps["vect"].get_feature_names()
         feature_names = [feature_names[i] for i
                          in ch2.get_support(indices=True)]
-        print feature_names
+        print(feature_names)
         # joblib.dump(gs_clf.best_estimator_, "{}/{}/{}.pkl".format(self.basedir, self.modelname, self.modelname))
         # self.test()
 
@@ -205,8 +205,8 @@ class ScikitRE(ReModel):
 
         # for doc, category in zip(self.features, self.pred):
         #     print '%r => %s' % (doc, category)
-        print np.mean(self.pred == self.labels)
-        print(metrics.classification_report(self.labels, self.pred))
+        print(np.mean(self.pred == self.labels))
+        print((metrics.classification_report(self.labels, self.pred)))
 
     def get_predictions(self, corpus):
         #real_pair_type = config.event_types[self.pairtype]["subtypes"][0]

@@ -119,7 +119,7 @@ class MirbaseDB(object):
         self.g.load(self.path + "data.rdf")
         # print "Opened graph with {} triples".format(len(self.g))
         self.get_label_to_acc()
-        self.choices = self.labels.keys()
+        self.choices = list(self.labels.keys())
 
     def get_label_to_acc(self):
         for subj, pred, obj in self.g.triples((None, RDFS.label, None)):
@@ -129,7 +129,7 @@ class MirbaseDB(object):
 
     def save_graph(self):
         self.g.serialize(self.path + "data.rdf", format='pretty-xml')
-        print 'Triples in graph after add: ', len(self.g)
+        print('Triples in graph after add: ', len(self.g))
         self.g.close()
 
 def main():
@@ -161,19 +161,19 @@ def main():
     else:
         mirbase.load_graph()
         if options.action == "map":
-            print mirbase.map_label(options.label)
+            print(mirbase.map_label(options.label))
         elif options.action == "geturi":
             q = prepareQuery('SELECT ?s WHERE { ?s rdfs:label ?label .}', initNs={"rdfs": RDFS })
             l = Literal(options.label)
             for row in mirbase.g.query(q, initBindings={'label': l}):
-                print row
+                print(row)
         else:
             m = URIRef("http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=MI0017413")
             #for s, p, o in g:
             #    print s, p, o
             mirna_class = URIRef("http://purl.obolibrary.org/obo/SO_0000276")
             for row in mirbase.query('select ?s where { ?s rdf:type [] .}'):
-                print row.s
+                print(row.s)
 
 if __name__ == "__main__":
     main()

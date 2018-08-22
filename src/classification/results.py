@@ -101,8 +101,8 @@ class ResultsNER(object):
 
     def load_corpus(self, goldstd):
         logging.info("loading corpus %s" % config.paths[goldstd]["corpus"])
-        corpus = pickle.load(open(config.paths[goldstd]["corpus"]))
-
+        file = open(paths[goldstd]["corpus"], 'rb')
+        corpus = pickle.load(file)
         for did in corpus.documents:
             for sentence in corpus.documents[did].sentences:
                 sentence.entities = self.corpus[did][sentence.sid]
@@ -125,9 +125,9 @@ class ResultsNER(object):
                     total += 1
                     #logging.info("{} - {}".format(e.text, e.score))
                     if len(e.recognized_by) > 1:
-                        scores += sum(e.score.values())/len(e.score.values())
+                        scores += sum(e.score.values())/len(list(e.score.values()))
                     elif len == 1:
-                        scores += e.score.values()[0]
+                        scores += list(e.score.values())[0]
                     #if e.score < 0.8:
                     #    logging.info("{0} score of {1}".format(e.text.encode("utf-8"),
                     #                                            e.score))
@@ -163,7 +163,7 @@ def combine_results(modelname, results, resultsname, etype, models):
     # first results are used as reference
     all_results.corpus = results[0].corpus
     for r in results:
-        print r.path
+        print(r.path)
         for did in r.corpus.documents:
             for sentence in r.corpus.documents[did].sentences:
                 ref_sentence = all_results.corpus.documents[did].get_sentence(sentence.sid)
@@ -190,7 +190,7 @@ def main():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument("action", default="evaluate", help="Actions to be performed.")
     parser.add_argument("goldstd", default="chemdner_sample", help="Gold standard to be used.",
-                        choices=config.paths.keys())
+                        choices=list(config.paths.keys()))
     parser.add_argument("--corpus", dest="corpus",
                       default="data/chemdner_sample_abstracts.txt.pickle",
                       help="format path")
@@ -226,7 +226,7 @@ def main():
             results.load_corpus(options.goldstd)
             results_list.append(results)
         else:
-            print "results not found"
+            print("results not found")
 
     if options.action == "combine":
         # add another set of annotations to each sentence, ending in combined

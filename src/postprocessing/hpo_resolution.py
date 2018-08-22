@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, unicode_literals
+
 import MySQLdb
 import re
 import sys
@@ -8,7 +8,7 @@ import os
 import shutil
 from subprocess import Popen, PIPE
 from optparse import OptionParser
-import cPickle as pickle
+import pickle as pickle
 import logging
 from sys import platform as _platform
 import atexit
@@ -108,11 +108,11 @@ def get_IC():
     cur.execute(query)
 
     res = cur.fetchall()
-    return zip(*res)
+    return list(zip(*res))
     
 
 def exit_handler():
-    print 'Saving hpo dictionary...!'
+    print('Saving hpo dictionary...!')
     pickle.dump(hpo, open(hpodic, "wb"))
 
 atexit.register(exit_handler)
@@ -139,7 +139,7 @@ def load_synonyms():
     cur.execute(query)
     ids = cur.fetchall()
     for i in ids:
-        print "getting synonyms for" + i[1].lower() + '(' + str(i[0]) + ')',
+        print("getting synonyms for" + i[1].lower() + '(' + str(i[0]) + ')', end=' ')
         synset = set()
         synset.add(i[1].lower())
         query = """SELECT term_synonym
@@ -147,13 +147,13 @@ def load_synonyms():
            WHERE term_id = %s""" % i[0]
         cur.execute(query)
         names = cur.fetchall()
-        print len(names)
+        print(len(names))
         for name in names:
             #print name[0], 
             synset.add(name[0].lower())
         syns.append(synset)
     pickle.dump(syns, open("data/hpo_synonyms.pickle", 'wb'))
-    print "done"
+    print("done")
 
 
 def check_dist_between(cid1, cid2):
@@ -264,14 +264,14 @@ def main():
             elif len(term) > 1:
                 if term[1] != res[0]:
                     errors += 1
-        print " nulls: " + str(i) + ' errors:' + str(errors) + ' total:' + str(count)
+        print(" nulls: " + str(i) + ' errors:' + str(errors) + ' total:' + str(count))
 
     elif options.action == "info":
         info = get_IC()
         pickle.dump(info, open("hpo_IC.pickle", "wb"))
 
     elif options.action == "map":
-        print find_hpo_term(options.text)
+        print(find_hpo_term(options.text))
     elif options.action == "synonyms":
         load_synonyms()
 

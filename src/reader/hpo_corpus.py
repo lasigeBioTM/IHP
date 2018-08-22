@@ -14,8 +14,8 @@ from other.dictionary import stopwords, removewords, go_words, definingwords, go
 same_stop_words = [""]
 describing = ["recurrent", "male", "female", "postnatal", "progressive", "isolated", "postpubertal", "severe", "distal", "conductive", "mixed", "congenital", "bilateral", "unilateral", "chronic", "episodic", "mild", "borderline-mild", "global", "generalized", "partial", "acute", "proximal", "profound", "complete", "moderate", "diffuse", "nonprogressive", "extreme", "general"]
 
-annotation_gazette = open("data/annotation_gazette.txt")
-gazette = open("data/gazette.txt")
+annotation_gazette = open("data/annotation_gazette.txt", encoding='utf-8')
+gazette = open("data/gazette.txt", encoding='utf-8')
 ann_gaz = [x.strip() for x in annotation_gazette]
 gazz = [x.strip() for x in gazette]
 
@@ -143,10 +143,10 @@ class HPOCorpus(Corpus):
 		else:
 			sentence = self.documents[did].find_sentence_containing(start, end)
 			if not sentence:
-				print "could not find this sentence!", start, end
+				print("could not find this sentence!", start, end)
 		tokens = sentence.find_tokens_between(start, end)
 		if not tokens:
-			print "could not find tokens!", start, end, sentence.sid, ':'.join(res)
+			print("could not find tokens!", start, end, sentence.sid, ':'.join(res))
 			sys.exit()
 		entity = sentence.entities.find_entity(start - sentence.offset, end - sentence.offset)
 		return tokens, sentence, entity
@@ -215,19 +215,19 @@ class HPOCorpus(Corpus):
 				if "gen_errors" in rules:
 					#Remove entities smaller than 3 characters
 					if len(str(offset[3].encode("utf-8")).lower()) < 3:
-						print "small length removed", offset
+						print("small length removed", offset)
 						to_remove.append(offset)
 
 					#Remove words that only have one double-quote or parenthesis
 					try:
 						if '"' in str(offset[3].encode("utf-8")).lower():
 							if str(offset[3].encode("utf-8")).lower().count('"') == 1:
-								print "qt removed", offset
+								print("qt removed", offset)
 								to_remove.append(offset)
 						if ')' in str(offset[3].encode("utf-8")).lower() or '(' in str(offset[3].encode("utf-8")).lower():
 							cou = str(offset[3].encode("utf-8")).lower().count(')') + str(offset[3].encode("utf-8")).lower().count('(')
 							if cou != 2:
-								print "qt removed", offset
+								print("qt removed", offset)
 								to_remove.append(offset)							
 					except UnicodeDecodeError:
 						pass
@@ -239,7 +239,7 @@ class HPOCorpus(Corpus):
 							flag = True
 					if flag:
 						if len(str(offset[3].encode("utf-8")).split(" ")) < 3:
-							print "defword removed", offset
+							print("defword removed", offset)
 							to_remove.append(offset)
 
 					#Remove entities that contain digits
@@ -253,7 +253,7 @@ class HPOCorpus(Corpus):
 								if f == False:
 									digflag = False
 							if digflag == True:
-								print "digits removed", offset
+								print("digits removed", offset)
 								to_remove.append(offset)
 					except UnicodeDecodeError:
 						pass
@@ -266,7 +266,7 @@ class HPOCorpus(Corpus):
 						word == str(offset[3].encode("utf-8")).lower().split(" ")[-1]):
 							go_count += 1
 					if go_count > 1:
-						print "gowords removed", offset
+						print("gowords removed", offset)
 						to_remove.append(offset)
 
 					#Removes Entities that contain 2 words and have a comma
@@ -274,7 +274,7 @@ class HPOCorpus(Corpus):
 						# 	print "and_comma removed", offset
 						# 	to_remove.append(offset)
 					if len(str(offset[3].encode("utf-8")).split(" ")) <= 2 and "," in str(offset[3].encode("utf-8")):
-						print offset
+						print(offset)
 						to_remove.append(offset)
 
 				if "negcon" in rules:
@@ -282,7 +282,7 @@ class HPOCorpus(Corpus):
 					#It's necessary to have at least 3 words to give a negative connotaction to positive nouns
 					for noun in good_nouns:
 						if noun in str(offset[3].encode("utf-8")) and len(str(offset[3].encode("utf-8")).split(" ")) < 3:
-							print "good_nouns word removed", offset
+							print("good_nouns word removed", offset)
 							to_remove.append(offset)
 
 				# if "check_nouns" in rules:
@@ -329,32 +329,32 @@ class HPOCorpus(Corpus):
 					words = [ str(x['word'].encode("utf-8")) for x in toks]
 					if len(postags) > 1:
 						if postags[-1] in exlude_last and words[-1] not in exception_list:
-							print "Last word removed", offset
+							print("Last word removed", offset)
 							to_remove.append(offset)
 						if postags[-1] in ["JJ", "JJR", "JJS"] and postags[-2] in exlude_last and words[-1] not in describing:
-							print "Last word ADJ removed", offset
+							print("Last word ADJ removed", offset)
 							to_remove.append(offset)
 						if postags[-1] == "RB" and postags[-2] in exlude_last:
-							print "Last word removed", offset
+							print("Last word removed", offset)
 							to_remove.append(offset)
 
 						#First words
 						if postags[0] == "DT":
-							print "Last word removed", offset
+							print("Last word removed", offset)
 							to_remove.append(offset)
 						if postags[-1] == ",":
-							print "Last word removed", offset
+							print("Last word removed", offset)
 							to_remove.append(offset)
 
 						#Last character
 						if str(offset[3].encode("utf-8"))[-1] == "-":
-							print "Last word removed", offset
+							print("Last word removed", offset)
 							to_remove.append(offset)
 
 						#Last word
 						lwords = ["has", "have", "is", "had"]	
 						if str(offset[3].encode("utf-8")).split(" ")[-1] in lwords:
-							print "Last word removed", offset
+							print("Last word removed", offset)
 							to_remove.append(offset)					
 
 						#Create one that removes adjectives (length 1 entity) that are not in gazette.
@@ -362,10 +362,10 @@ class HPOCorpus(Corpus):
 						if postags[0] in ["JJ", "JJR", "JJS"]:
 							if words[0] not in gazz+ann_gaz:
 								to_remove.append(offset)
-								print "Adjective removed: {}".format(words[0])
+								print("Adjective removed: {}".format(words[0]))
 
 
-	 		to_remove = set(list(to_remove))
+                        to_remove = set(list(to_remove))
 		return to_remove
 
 def hpo_get_gold_ann_set(goldpath): #goldann="corpora/hpo/test_ann"

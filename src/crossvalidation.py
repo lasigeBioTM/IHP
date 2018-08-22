@@ -5,20 +5,20 @@ import time
 import argparse
 import pickle
 import sys
-from classification.ner.crfsuitener import CrfSuiteModel
-from classification.ner.simpletagger import feature_extractors
-from classification.ner.stanfordner import StanfordNERModel
-from classification.results import ResultsNER
-from config import config
-from evaluate import get_gold_ann_set, get_results
+from .classification.ner.crfsuitener import CrfSuiteModel
+from .classification.ner.simpletagger import feature_extractors
+from .classification.ner.stanfordner import StanfordNERModel
+from .classification.results import ResultsNER
+from .config import config
+from .evaluate import get_gold_ann_set, get_results
 # from postprocessing.chebi_resolution import add_chebi_mappings
 # from postprocessing.ssm import add_ssm_score
-from text.corpus import Corpus
+from .text.corpus import Corpus
 
 
 def run_crossvalidation(goldstd_list, corpus, model, cv, crf="stanford", entity_type="all", cvlog="cv.log"):
     logfile = open(cvlog, 'w')
-    doclist = corpus.documents.keys()
+    doclist = list(corpus.documents.keys())
     random.shuffle(doclist)
     size = int(len(doclist)/cv)
     sublists = chunks(doclist, size)
@@ -33,7 +33,7 @@ def run_crossvalidation(goldstd_list, corpus, model, cv, crf="stanford", entity_
         trainids = list(itertools.chain.from_iterable(sublists[:nlist]))
         trainids += list(itertools.chain.from_iterable(sublists[nlist+1:]))
         train_corpus, test_corpus = None, None
-        print 'CV{} - test set: {}; train set: {}'.format(nlist, len(testids), len(trainids))
+        print('CV{} - test set: {}; train set: {}'.format(nlist, len(testids), len(trainids)))
         train_corpus = Corpus(corpus.path + "_train", documents={did: corpus.documents[did] for did in trainids})
         test_corpus = Corpus(corpus.path + "_test", documents={did: corpus.documents[did] for did in testids})
         # logging.debug("train corpus docs: {}".format("\n".join(train_corpus.documents.keys())))
@@ -54,7 +54,7 @@ def run_crossvalidation(goldstd_list, corpus, model, cv, crf="stanford", entity_
             train_model = StanfordNERModel(basemodel, entity_type)
         elif crf == "crfsuite":
             train_model = CrfSuiteModel(basemodel, entity_type)
-        train_model.load_data(train_corpus, feature_extractors.keys())
+        train_model.load_data(train_corpus, list(feature_extractors.keys()))
         train_model.train()
 
         # test
@@ -65,7 +65,7 @@ def run_crossvalidation(goldstd_list, corpus, model, cv, crf="stanford", entity_
         elif crf == "crfsuite":
             test_model = CrfSuiteModel(basemodel, entity_type)
         test_model.load_tagger(port=9191+nlist)
-        test_model.load_data(test_corpus, feature_extractors.keys(), mode="test")
+        test_model.load_data(test_corpus, list(feature_extractors.keys()), mode="test")
         final_results = None
         final_results = test_model.test(test_corpus, port=9191+nlist)
         if crf == "stanford":
@@ -99,8 +99,8 @@ def run_crossvalidation(goldstd_list, corpus, model, cv, crf="stanford", entity_
         # logging.info("precision: {} recall:{}".format(str(values[13]), str(values[14])))
     pavg = sum(p)/cv
     ravg = sum(r)/cv
-    print "precision: average={} all={}".format(str(pavg), '|'.join([str(pp) for pp in p]))
-    print "recall: average={}  all={}".format(str(ravg), '|'.join([str(rr) for rr in r]))
+    print("precision: average={} all={}".format(str(pavg), '|'.join([str(pp) for pp in p])))
+    print("recall: average={}  all={}".format(str(ravg), '|'.join([str(rr) for rr in r])))
     all_goldset = set()
     for gs in goldstd_list:
         goldset = get_gold_ann_set(config.paths[gs]["format"], config.paths[gs]["annotations"], entity_type,
@@ -114,7 +114,7 @@ def chunks(l, n):
     """ return list of n sized sublists of l
     """
     subs = []
-    for i in xrange(0, len(l), n):
+    for i in range(0, len(l), n):
         subs.append(l[i:i+n])
     return subs
 
@@ -123,7 +123,7 @@ def main():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument("--goldstd", default="", dest="goldstd", nargs="+",
                       help="Gold standard to be used. Will override corpus, annotations",
-                      choices=config.paths.keys())
+                      choices=list(config.paths.keys()))
     parser.add_argument("--submodels", default="", nargs='+', help="sub types of classifiers"),
     parser.add_argument("--corpus", dest="corpus", nargs=2,
                       default=["chemdner", "CHEMDNER/CHEMDNER_SAMPLE_JUNE25/chemdner_sample_abstracts.txt"],

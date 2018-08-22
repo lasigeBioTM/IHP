@@ -45,7 +45,7 @@ def main():
         load_from_file(sys.argv[2]) # path to miRNA tracker file should be the second argument
     else:
         res = find_mirna(sys.argv[1])
-        print res
+        print(res)
 
 if __name__ == "__main__":
     main()

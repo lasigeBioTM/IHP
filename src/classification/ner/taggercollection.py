@@ -38,7 +38,7 @@ class TaggerCollection(object):
         Train models for each subtype of entity, and a general model.
         :param types: subtypes of entities to train individual models, as well as a general model
         """
-        self.basemodel.load_data(self.corpus, feature_extractors.keys(), subtype="all")
+        self.basemodel.load_data(self.corpus, list(feature_extractors.keys()), subtype="all")
         for t in self.types:
             typepath = self.basepath + "_" + t
             model = StanfordNERModel(typepath, subtypes=self.basemodel.subtypes)
@@ -70,7 +70,7 @@ class TaggerCollection(object):
         """
         # TODO: parallelize
         results = ResultSetNER(corpus, self.basepath)
-        self.basemodel.load_data(corpus, feature_extractors.keys())
+        self.basemodel.load_data(corpus, list(feature_extractors.keys()))
         all_results = []
         tasks = [(self.models[t], t, corpus, self.basemodel, self.basepath, self.baseport + i) for i, t in enumerate(self.types)]
 

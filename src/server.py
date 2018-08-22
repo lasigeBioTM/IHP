@@ -9,20 +9,20 @@ import xml.etree.ElementTree as ET
 import xml.dom.minidom as minidom
 import logging
 import codecs
-import cPickle as pickle
+import pickle as pickle
 import random
 import string
 
-from text.document import Document
-from text.corpus import Corpus
-from classification.ner.taggercollection import TaggerCollection
-from classification.ner.simpletagger import SimpleTaggerModel, feature_extractors
-from postprocessing.ensemble_ner import EnsembleNER
-from reader import pubmed
-from text.pair import Pair
-from config import config
-from postprocessing.chebi_resolution import add_chebi_mappings
-from postprocessing.ssm import add_ssm_score
+from .text.document import Document
+from .text.corpus import Corpus
+from .classification.ner.taggercollection import TaggerCollection
+from .classification.ner.simpletagger import SimpleTaggerModel, feature_extractors
+from .postprocessing.ensemble_ner import EnsembleNER
+from .reader import pubmed
+from .text.pair import Pair
+from .config import config
+from .postprocessing.chebi_resolution import add_chebi_mappings
+from .postprocessing.ssm import add_ssm_score
 
 
 
@@ -85,7 +85,7 @@ class IICEServer(object):
         model = SimpleTaggerModel("models/chemdner_train_f13_lbfgs_" + modeltype)
         model.load_tagger()
         # load data into the model format
-        model.load_data(test_corpus, feature_extractors.keys())
+        model.load_data(test_corpus, list(feature_extractors.keys()))
         # run the classifier on the data
         results = model.test(stats=False)
         #results = ResultsNER("models/chemdner_train_f13_lbfgs_" + modeltype)

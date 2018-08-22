@@ -32,7 +32,7 @@ class MirtexCorpus(Corpus):
         time_per_abs = []
         for current, f in enumerate(trainfiles):
             #logging.debug('%s:%s/%s', f, current + 1, total)
-            print '{}:{}/{}'.format(f, current + 1, total)
+            print('{}:{}/{}'.format(f, current + 1, total))
             did = f.split(".")[0]
             t = time.time()
             with open(f, 'r') as txt:
@@ -95,7 +95,7 @@ class MirtexCorpus(Corpus):
                                 end = dend - sentence.offset
                                 sentence.tag_entity(start, end, type_match[entity_type], text=etext)
                             else:
-                                print "could not find sentence for this span: {}-{}".format(dstart, dend)
+                                print("could not find sentence for this span: {}-{}".format(dstart, dend))
         self.find_relations()
         # self.evaluate_normalization()
 

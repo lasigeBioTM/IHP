@@ -16,7 +16,7 @@ class MultiR(ReModel):
     def generate_data(self, corpus, modelname, pairtypes):
         # TODO: refactor this part to corpus class
         if os.path.isfile(self.temp_dir + modelname + ".pb"):
-            print "removed old data"
+            print("removed old data")
             os.remove(self.temp_dir + modelname + ".pb")
         trainlines = []
         # get all entities of this document

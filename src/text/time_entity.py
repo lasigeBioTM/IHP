@@ -27,7 +27,7 @@ class TimeEntity(Entity):
         if "dividedates" in rules:
             if re.match(r"^\d{4}-\d{1,2}-\d{1,2}\s+\d{4}-\d{1,2}-\d{1,2}$", self.text):
                 newtext1, newtext2 = self.text.split("  ")
-                print newtext1, newtext2
+                print(newtext1, newtext2)
                 self.text = newtext1
                 entity2 = TimeEntity(self.tokens)
                 entity2.text = newtext2

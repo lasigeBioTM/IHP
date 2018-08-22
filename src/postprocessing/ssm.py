@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import MySQLdb
 import sys
-from chebi_resolution import find_chebi_term
+from .chebi_resolution import find_chebi_term
 import os
 import pickle
 from optparse import OptionParser
@@ -325,7 +325,7 @@ def get_ssm(entities, measure, ontology="chebi", hindex=4):
     ssms = {} #{e1ID:{e2ID:ssm, e3ID:ssm}}
 
     if measure not in measures and measure not in go_measures:
-        print 'measure not implement: ' + measure
+        print('measure not implement: ' + measure)
         sys.exit()
     #check if chebi appears at least twice
     #nchebi = 0
@@ -445,7 +445,7 @@ def main():
     logging.basicConfig(level=numeric_level, format='%(asctime)s %(levelname)s %(message)s')
 
     if options.file + '_' + options.action + '.pickle' in os.listdir(os.getcwd()) and not options.reload:
-        print "loading data pickle", options.file + '_' + options.action + '.pickle'
+        print("loading data pickle", options.file + '_' + options.action + '.pickle')
         data = pickle.load(open(options.file + '_' + options.action + '.pickle', 'rb'))
     else:
         data = {}
@@ -458,15 +458,15 @@ def main():
     if options.action == "measure":
         if measure == 'all':
             for m in measures:
-                print m, eval(m + '("' + id1 + '", "' + id2 + '")')
+                print(m, eval(m + '("' + id1 + '", "' + id2 + '")'))
         elif measure not in measures and measure not in go_measures:
-            print 'measure not implement: ' + measure
+            print('measure not implement: ' + measure)
             sys.exit()
         else:
-            print measure, id1, id2
+            print(measure, id1, id2)
             expr = measure + '("' + id1 + '", "' + id2 + '")'
-            print expr
-            print eval(expr)
+            print(expr)
+            print(eval(expr))
 
 if __name__ == "__main__":
     main()

@@ -51,9 +51,9 @@ class CrfSuiteRE(ReModel):
             # include transitions that are possible, but not observed
             'feature.possible_transitions': False
         })
-        print "training model..."
+        print("training model...")
         self.trainer.train(self.modelname + ".model")  # output model filename
-        print "done."
+        print("done.")
 
 
     def load_classifier(self, port=None):
@@ -72,11 +72,11 @@ class CrfSuiteRE(ReModel):
                 #logging.debug("{0}-{1}".format(i,x))
                 prob = self.tagger.marginal(x, i)
                 if math.isnan(prob):
-                    print "NaN!!"
+                    print("NaN!!")
                     if x == "other":
                         prob = 0
                     else:
-                        print x, xseq[i]
+                        print(x, xseq[i])
                         #print xseq
                         #print self.predicted[-1]
                         #sys.exit()
@@ -287,4 +287,3 @@ class CrfSuiteRE(ReModel):
         return results
 
 
-   

@@ -65,7 +65,7 @@ class ChemdnerCorpus(Corpus):
 
 def write_chemdner_files(results, models, goldset, ths, rules):
     """ results files for CHEMDNER CEMP and CPD tasks"""
-    print "saving results to {}".format(results.path + ".tsv")
+    print("saving results to {}".format(results.path + ".tsv"))
     with codecs.open(results.path + ".tsv", 'w', 'utf-8') as outfile:
         cpdlines, max_entities = results.corpus.write_chemdner_results(models, outfile, ths, rules)
     cpdlines = sorted(cpdlines, key=itemgetter(2))
@@ -115,7 +115,7 @@ def main():
                       choices=["load_corpus"])
     parser.add_argument("--goldstd", default="", dest="goldstd", nargs="+",
                       help="Gold standard to be used. Will override corpus, annotations",
-                      choices=config.paths.keys())
+                      choices=list(config.paths.keys()))
     parser.add_argument("--submodels", default="", nargs='+', help="sub types of classifiers"),
     parser.add_argument("-i", "--input", dest="input", action="store",
                       default='''Administration of a higher dose of indinavir should be \\
@@ -157,7 +157,7 @@ considered when coadministering with megestrol acetate.''',
     # pre-processing options
     if options.actions == "load_corpus":
         if len(options.goldstd) > 1:
-            print "load only one corpus each time"
+            print("load only one corpus each time")
             sys.exit()
         options.goldstd = options.goldstd[0]
         corpus_format = config.paths[options.goldstd]["format"]
@@ -178,7 +178,7 @@ considered when coadministering with megestrol acetate.''',
             elif options.goldstd == "cemp_test_divide":
                 logging.info("loading corpus %s" % corpus_path)
                 corpus.load_corpus(corenlp_client, process=False)
-                docs = corpus.documents.keys()
+                docs = list(corpus.documents.keys())
                 step = int(len(docs)/10)
                 logging.info("step: {}".format(str(step)))
                 for i in range(10):

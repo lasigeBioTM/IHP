@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+
 import logging
 import socket
 import sys
@@ -8,8 +8,8 @@ import pprint
 from classification.ner.stanfordner import stanford_coding
 #from text.protein_entity import ProteinEntity
 
-from token2 import Token2
-from entity import Entities
+from .token2 import Token2
+from .entity import Entities
 from classification.ner.simpletagger import create_entity
 from text.pair import Pair, Pairs
 from classification.rext import ddi_kernels
@@ -48,7 +48,7 @@ class Sentence(object):
         """
         # self.sentences = []
         if len(corenlpres['sentences']) > 1:
-            print self.text
+            print(self.text)
             sys.exit("Number of sentences from CoreNLP is not 1.")
         if len(corenlpres['sentences']) == 0:
             self.tokens = []
@@ -74,7 +74,7 @@ class Sentence(object):
                 #token_seq = rext.split(r'(\w+)(/|\\|\+|\.)(\w+)', t[0])
                 #token_seq = [t[0]]
                 # print t[0], token_seq
-                if len(token_seq) > 3 and t["word"] not in stanford_coding.keys():
+                if len(token_seq) > 3 and t["word"] not in list(stanford_coding.keys()):
                     # logging.info("{}: {}".format(t["word"], "&".join(token_seq)))
                     for its, ts in enumerate(token_seq):
                         if ts.strip() != "":
@@ -138,7 +138,7 @@ class Sentence(object):
             if e.start == start and e.end == end:
                 to_delete.append(e)
                 for t in e.tokens:
-                    tagkeys = t.tags.keys()
+                    tagkeys = list(t.tags.keys())
                     for tag in tagkeys:
                         if tag.startswith(source):
                             del t.tags[tag]
@@ -192,9 +192,9 @@ class Sentence(object):
 
             if "text" in kwargs and newtext != kwargs["text"]:
                 if newtext not in kwargs["text"] and kwargs["text"] not in newtext:
-                    print start, end, "***************", newtext, "+++++", kwargs["text"]
+                    print(start, end, "***************", newtext, "+++++", kwargs["text"])
                     logging.info("text does not match: {}=>{}".format(newtext, kwargs["text"]))
-                    print exclude, self.text[tlist[0].start:tlist[-1].end] 
+                    print(exclude, self.text[tlist[0].start:tlist[-1].end]) 
                     #print self.text[tlist[0].start:exclude[0][0]] #Fails if exclude is None
                     #print self.text[exclude[0][0]:exclude[0][1]]
                     #print self.text[exclude[0][1]:tlist[-1].end]
@@ -281,11 +281,11 @@ class Sentence(object):
         candidates = []
         for t in self.tokens:
             if t.text == text:
-                print t.text, text
+                print(t.text, text)
                 candidates.append(t)
-        print text, candidates
+        print(text, candidates)
         if len(candidates) == 0:
-            print "could not find tokens!"
+            print("could not find tokens!")
         elif len(candidates) == 1:
             return candidates
         elif len(candidates)-1 > count:

@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import division, unicode_literals
+
 import sys
 import requests
 
@@ -18,14 +18,14 @@ def main():
         data = {"text": text, "format": "json"}
         # r = requests.post('http://10.10.4.63:8080/iice/chemical/entities', json=data)
         r = requests.post('http://127.0.0.1:8080/iice/chemical/entities', json=data)
-        print r.text
-        print r.url
+        print(r.text)
+        print(r.url)
         if len(sys.argv) > 2 and sys.argv[2] == "int":
             data = r.json()
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
             rel = requests.post('http://10.10.4.63:8080/iice/chemical/interactions', json=data)
-            print
-            print rel.json()
+            print()
+            print(rel.json())
 
 
 if __name__ == "__main__":

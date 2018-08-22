@@ -71,7 +71,7 @@ class HPODocument(Document):
                 totalchars += len(s.text)
                 totalchars = self.get_space_between_sentences(totalchars)
             if not found:
-                print "could not find sentence for %s:%s on %s!" % (start, end, self.did)
+                print("could not find sentence for %s:%s on %s!" % (start, end, self.did))
                 # sys.exit()
 
     def write_hpo_results(self, source, outfile, ths={"hpo":0.0}, rules=[]):

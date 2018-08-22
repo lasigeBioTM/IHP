@@ -89,7 +89,7 @@ class GeniaCorpus(Corpus):
                         eid = this_sentence.tag_entity(estart, eend, type_match.get(entity_type, "entity"),
                                                      text=e.text)
                         if eid is None:
-                            print "did not add this entity: {}".format(e.text)
+                            print("did not add this entity: {}".format(e.text))
                         # print e.text
                         notskipped += 1
 

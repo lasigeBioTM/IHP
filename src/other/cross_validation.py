@@ -87,7 +87,7 @@ def validation(results_file, crf, rules, rulesg):
     results = open(results_file).readlines()[:6]
     precision = float(results[4].split(": ")[1])
     recall = float(results[5].split(": ")[1])
-    print "Results are in: precision || recall -> ", precision, recall
+    print("Results are in: precision || recall -> ", precision, recall)
     
     
     return precision, recall
@@ -171,7 +171,7 @@ def cross_validation(main_directory):
         res.write("{}\t{}\n".format(p_suite,  r_suite))#str(p_stan), str(r_stan), str(p_stan_nr), str(r_stan_nr), str(p_stan_g), str(r_stan_g), str(p_suite), str(r_suite), str(p_suite_nr), str(r_suite_nr), str(p_suite_g), str(r_suite_g)))
         #Reset sets for next round
 
-        print str(len(train_set)), len(test_set)
+        print(str(len(train_set)), len(test_set))
         train_set = []
         test_set = []
         res.close()

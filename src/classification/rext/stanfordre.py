@@ -25,7 +25,7 @@ class StanfordRE(ReModel):
 
     def generate_data(self, corpus, modelname, pairtypes):
         if os.path.isfile(self.temp_dir + modelname + ".txt"):
-            print "removed old data"
+            print("removed old data")
             os.remove(self.temp_dir + modelname + ".txt")
         trainlines = []
         # get all entities of this document
@@ -92,7 +92,7 @@ class StanfordRE(ReModel):
         with open(config.corenlp_dir + "roth.properties", 'r') as propfile:
             lines = propfile.readlines()
 
-        print lines
+        print(lines)
         with open(config.corenlp_dir + "roth.properties", 'w') as propfile:
             for l in lines:
                 if l.startswith("serializedRelationExtractorPath"):
@@ -106,29 +106,29 @@ class StanfordRE(ReModel):
         self.generate_data(self.corpus, self.modelname, pairtypes=self.relationtype)
         # java -cp classpath edu.stanford.nlp.ie.machinereading.MachineReading --arguments roth.properties
         if os.path.isfile(config.corenlp_dir + self.modelname):
-            print "removed old model"
+            print("removed old model")
             os.remove(config.corenlp_dir + self.modelname)
         if not os.path.isfile(self.temp_dir + self.modelname  + ".corp"):
-            print "could not find training file " + config.corenlp_dir + self.modelname + ".corp"
+            print("could not find training file " + config.corenlp_dir + self.modelname + ".corp")
             sys.exit()
         self.write_props()
         classpath = config.corenlp_dir + "*"
         srecall = ['java', '-mx3g', '-classpath', classpath, "edu.stanford.nlp.ie.machinereading.MachineReading",
                           "--arguments",  config.corenlp_dir + "roth.properties"]
-        print " ".join(srecall)
+        print(" ".join(srecall))
         # sys.exit()
         srecall = Popen(srecall) #, stdout=PIPE, stderr=PIPE)
         res  = srecall.communicate()
         if not os.path.isfile(config.corenlp_dir + self.modelname):
-            print "error with StanfordRE! model file was not created"
-            print res[1]
+            print("error with StanfordRE! model file was not created")
+            print(res[1])
             sys.exit()
         else:
             statinfo = os.stat(config.corenlp_dir + self.modelname)
             if statinfo.st_size == 0:
-                print "error with StanfordRE! model has 0 bytes"
-                print res[0]
-                print res[1]
+                print("error with StanfordRE! model has 0 bytes")
+                print(res[0])
+                print(res[1])
                 sys.exit()
         # logging.debug(res)
 
@@ -151,7 +151,7 @@ class StanfordRE(ReModel):
                     })
                 for o in corenlpres["sentences"][0]["openie"]:
                     if "mir" in o["object"] or "mir" in o["subject"]:
-                        print "{}={}>{}".format(o["subject"], o["relation"], o["object"])
+                        print("{}={}>{}".format(o["subject"], o["relation"], o["object"]))
 
 
     def test(self, outputfile="jsre_results.txt"):

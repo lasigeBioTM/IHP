@@ -28,7 +28,7 @@ def get_pubmed_abstracts():
              "sort": "pub+date"} #max 100 000
 
     r = requests.get('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi', query)
-    print "Request Status: " + str(r.status_code)
+    print("Request Status: " + str(r.status_code))
     response = r.text
     root = ET.fromstring(response.encode("utf-8"))
     pmids = []
@@ -39,7 +39,7 @@ def get_pubmed_abstracts():
         for i, pmid in enumerate(pmids):
             doc = pubmed.PubmedDocument(pmid)
             docfile.write(doc.text)
-            print "{}/{}".format(i, len(pmids))
+            print("{}/{}".format(i, len(pmids)))
             sleep(0.5)
 
 def process_documents():
@@ -50,7 +50,7 @@ def process_documents():
     starts = set()
     with codecs.open("corpora/Thaliana/documents.txt", 'r', 'utf-8') as docfile:
         for l in docfile:
-            print lcount
+            print(lcount)
             if l[:20] in starts:
                 continue
             lcount += 1
@@ -59,7 +59,7 @@ def process_documents():
             newdoc = Document(l.strip())
             newdoc.process_document(corenlp_client)
             for sentence in newdoc.sentences:
-                print [t.text for t in sentence.tokens]
+                print([t.text for t in sentence.tokens])
             newtext = ""
             corpus.documents["d" + str(lcount)] = newdoc
             """for s in newdoc.sentences:
@@ -84,11 +84,11 @@ def write_train_file(filepath="corpora/Thaliana/documents-processed.txt", corpus
                 f.write(" ".join([t.lemma.lower() for t in sentence.tokens if t.text.isalnum() and not t.text.isnumeric()]) + "\n")
 
 def train_model(docfile_root="corpora/Thaliana/documents-processed"):
-    print "phrases..."
+    print("phrases...")
     word2vec.word2phrase(docfile_root + ".txt", docfile_root + "-phrases.txt", verbose=True)
     #print "word2vec"
     #word2vec.word2vec(docfile_root + "-phrases.txt", docfile_root + ".bin", size=1000, verbose=True, min_count=1)
-    print "word2cluster"
+    print("word2cluster")
     word2vec.word2clusters(docfile_root + ".txt", docfile_root + '-clusters.txt', 10000, verbose=True, min_count=1, threads=4)
     #model = word2vec.load(docfile_root + '.bin')
     #indexes, metrics = model.cosine('AP2')
@@ -132,12 +132,12 @@ def match_relations(reltype, docfile_root="corpora/Thaliana/documents-processed"
                     unmatched2 += 1
                     #print
             #print "========================================"
-    print unmatched1, unmatched2
+    print(unmatched1, unmatched2)
 
 def get_seedev_docs(f="corpora/Thaliana/documents-processed.txt"):
     goldstd = "seedev_train"
     corpus_path = config.paths[goldstd]["corpus"]
-    print "loading corpus %s" % corpus_path
+    print("loading corpus %s" % corpus_path)
     corpus = pickle.load(open(corpus_path, 'rb'))
     final_text = []
     for did in corpus.documents:
@@ -220,7 +220,7 @@ def annotate_corpus_entities(reltype, corpuspath="corpora/Thaliana/thaliana-docu
     matcher = MatcherModel("goldstandard")
     matcher.names = set(entities.keys())
     corpus, entitiesfound = matcher.test(corpus)
-    print "saving corpus..."
+    print("saving corpus...")
     corpus.save(corpuspath)
 
 
@@ -243,8 +243,8 @@ def annotate_corpus_relations(reltype, corpuspath="corpora/Thaliana/thaliana-doc
                                     #print entity2.text,"||", target_text, target_type
                                     if entity2.text == target_text: # and entity2.type == target_type:
                                         entity.targets.append((entity2.eid, target[1]))
-                                        print "found relation:", entity.text, entity2.text
-    print "saving corpus..."
+                                        print("found relation:", entity.text, entity2.text)
+    print("saving corpus...")
     corpus.save(corpuspath)
 
     # eid = sentence.tag_entity(start, end, entity_type, text=etext, original_id=tid, exclude=exclude)

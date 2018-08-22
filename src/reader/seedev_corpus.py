@@ -68,7 +68,7 @@ class SeeDevCorpus(Corpus):
         time_per_abs = []
         for current, f in enumerate(trainfiles):
             #logging.debug('%s:%s/%s', f, current + 1, total)
-            print '{}:{}/{}'.format(f, current + 1, total)
+            print('{}:{}/{}'.format(f, current + 1, total))
             did = f.split(".")[0].split("/")[-1]
             t = time.time()
             with codecs.open(f, 'r', 'utf-8') as txt:
@@ -125,12 +125,12 @@ class SeeDevCorpus(Corpus):
                             exclude = None
                         eid = sentence.tag_entity(start, end, entity_type, text=etext, original_id=tid, exclude=exclude)
                         if eid is None:
-                            print "no eid!", sentence.sid, start, end, exclude, etext, sentence.text
+                            print("no eid!", sentence.sid, start, end, exclude, etext, sentence.text)
                             sys.exit()
                         originalid_to_eid[did + "." + tid] = eid
                     else:
-                        print "{}: could not find sentence for this span: {}-{}|{}".format(did, dstart, dend, etext.encode("utf-8"))
-                        print
+                        print("{}: could not find sentence for this span: {}-{}|{}".format(did, dstart, dend, etext.encode("utf-8")))
+                        print()
                         #sys.exit()
         self.load_relations(ann_dir, originalid_to_eid)
 
@@ -153,9 +153,9 @@ class SeeDevCorpus(Corpus):
                     sourceid = did + "." + sourceid.split(":")[-1]
                     targetid = did + "." + targetid.split(":")[-1]
                     if sourceid not in originalid_to_eid or targetid not in originalid_to_eid:
-                        print "{}: entity not found: {}=>{}".format(did, sourceid, targetid)
+                        print("{}: entity not found: {}=>{}".format(did, sourceid, targetid))
                         # print sorted([e.split(".")[-1] for e in originalid_to_eid if e.startswith(did)])
-                        print "skipped relation {}".format(rtype)
+                        print("skipped relation {}".format(rtype))
                         continue
                     sourceid, targetid = originalid_to_eid[sourceid], originalid_to_eid[targetid]
                     sid1 = '.'.join(sourceid.split(".")[:-1])
@@ -168,7 +168,7 @@ class SeeDevCorpus(Corpus):
                     sentence1 = self.documents[did].get_sentence(sid1)
                     sentence2 = self.documents[did].get_sentence(sid2)
                     if sentence1 is None:
-                        print "sentence not found:", did, sid1, sourceid, targetid, len(self.documents[did].sentences)
+                        print("sentence not found:", did, sid1, sourceid, targetid, len(self.documents[did].sentences))
                         continue
                     else:
                         entity1 = sentence1.entities.get_entity(sourceid)
@@ -320,7 +320,7 @@ class SeeDevCorpus(Corpus):
         for did in corpus2.documents:
             for sentence in corpus2.documents[did].sentences:
                 if any([len(e.targets)> 1 for e in sentence.entities.elist["goldstandard"]]):
-                    print "found sentence with relations:", sentence.sid
+                    print("found sentence with relations:", sentence.sid)
                     self.documents[sentence.sid] = Document(sentence.text, sentences=[sentence])
         self.save("corpora/Thaliana/seedev-extended.pickle")
 
@@ -357,7 +357,7 @@ def get_seedev_gold_ann_set(goldpath, entitytype, pairtype):
                         targetid = targetid.split(":")[-1]
                         source = tid_to_offsets[did + "." + sourceid]
                         target = tid_to_offsets[did + "." + targetid]
-                        gold_relations.add((did, source[:2], target[:2], u"{}={}>{}".format(source[2], ptype, target[2])))
+                        gold_relations.add((did, source[:2], target[:2], "{}={}>{}".format(source[2], ptype, target[2])))
                         #gold_relations.add((did, source[:2], target[:2], u"{}=>{}".format(source[2], target[2])))
     return gold_offsets, gold_relations
 

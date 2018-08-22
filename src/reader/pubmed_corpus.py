@@ -2,7 +2,7 @@ import logging
 import time
 import progressbar as pb
 from text.corpus import Corpus
-from pubmed import PubmedDocument
+from .pubmed import PubmedDocument
 
 class PubmedCorpus(Corpus):
     """

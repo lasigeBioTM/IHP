@@ -1,4 +1,4 @@
-from __future__ import division, absolute_import
+
 #from nltk.stem.porter import PorterStemmer
 #import jsonrpclib
 #from simplejson import loads
@@ -18,8 +18,8 @@ from other.dictionary import Dictionary, stopwords, removewords, go_words
 
 gazette = Dictionary()
 
-whitespace = [u"\u2002", u"\u2003", u"\u00A0", u"\u2009", u"\u200C", u"\u200D",
-              u'\u2005', u'\u2009', u'\u200A']
+whitespace = ["\u2002", "\u2003", "\u00A0", "\u2009", "\u200C", "\u200D",
+              '\u2005', '\u2009', '\u200A']
 # tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 #porter = PorterStemmer()
 
@@ -98,8 +98,8 @@ class Document(object):
                 'gazetteer': '/scr/nlp/data/machine-reading/Machine_Reading_P1_Reading_Task_V2.0/data/SportsDomain/NFLScoring_UseCase/NFLgazetteer.txt',
                 'outputFormat': 'json',
             })
-            if isinstance(corenlpres, basestring):
-                print corenlpres
+            if isinstance(corenlpres, str):
+                print(corenlpres)
                 corenlpres = corenlpserver.annotate(s.text.encode("utf8"), properties={
                 'ssplit.eolonly': True,
                 # 'annotators': 'tokenize,ssplit,pos,depparse,parse',
@@ -136,8 +136,8 @@ class Document(object):
                 totalchars += len(s.text)
                 totalchars = self.get_space_between_sentences(totalchars)
             if not found:
-                print "could not find sentence for %s:%s on %s!" % (start,
-                                                                       end, self.did)
+                print("could not find sentence for %s:%s on %s!" % (start,
+                                                                       end, self.did))
                 # sys.exit()
 
     def add_relation(self, entity1, entity2, subtype, relation, source="goldstandard", **kwargs):
@@ -251,7 +251,7 @@ class Document(object):
                 # print "found it!"
                 return s
         for s in self.sentences:
-            print s.tokens[0].dstart <= start, s.tokens[-1].dend >= end, s.tokens[0].dstart, s.tokens[-1].dend, s.text
+            print(s.tokens[0].dstart <= start, s.tokens[-1].dend >= end, s.tokens[0].dstart, s.tokens[-1].dend, s.text)
         return None
 
     def get_offsets(self, esource, ths, rules, off_list=None):
@@ -277,7 +277,7 @@ class Document(object):
             for e in sentence.entities.elist[source]:
                 if e.eid == eid:
                    return e
-        print "no entity found for eid {}".format(eid)
+        print("no entity found for eid {}".format(eid))
         return None
 
     def get_entities(self, source):

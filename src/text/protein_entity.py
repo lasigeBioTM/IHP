@@ -94,7 +94,7 @@ class ProteinEntity(Entity):
 
         res = cur.fetchone()
         if res is not None:
-            print res
+            print(res)
         else:
             query = """SELECT DISTINCT t.acc, t.name, p.name
                        FROM term t, prot p, prot_GOA_BP a
@@ -103,7 +103,7 @@ class ProteinEntity(Entity):
                        LIMIT 1;""" # or DESC
             cur.execute(query, (term,))
             res = cur.fetchone()
-            print res
+            print(res)
 
 token = Token2("IL-2")
 token.start, token.dstart, token.end, token.dend = 0,0,0,0

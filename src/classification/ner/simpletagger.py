@@ -321,7 +321,7 @@ def prev_words(sentence, i, j):
 #        return "EOS"
     else:
         words = []
-        for p in reversed(range(1,j+1)):
+        for p in reversed(list(range(1,j+1))):
             words.append(sentence.tokens[i-p].text)
         #print str(words)
         return str(words)
@@ -333,7 +333,7 @@ def next_words(sentence, i, j):
         return "EOS"
     else:
         words = []
-        for p in reversed(range(1,j+1)):
+        for p in reversed(list(range(1,j+1))):
             words.append(sentence.tokens[i+p].text)
         return str(words)
 
@@ -709,7 +709,7 @@ class SimpleTaggerModel(Model):
                 try:
                     lines.append("{0}\t{1}\n".format(self.tokens[isent][it].text, label))
                 except UnicodeEncodeError: #fml
-                    lines.append(u"{0}\t{1}\n".format(self.tokens[isent][it].text, label))
+                    lines.append("{0}\t{1}\n".format(self.tokens[isent][it].text, label))
             lines.append("\n")
         with codecs.open("{}.bilou".format(self.path), "w", "utf-8") as output:
             output.write("".join(lines))

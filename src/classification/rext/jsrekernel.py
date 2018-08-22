@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+
 import os
 import logging
 import random
@@ -31,7 +31,7 @@ class JSREKernel(ReModel):
         if os.path.isfile(self.temp_dir + self.pairtype + "_" + outputfile):
             os.remove(self.temp_dir + self.pairtype + "_" + outputfile)
         if not os.path.isfile(self.basedir + self.modelname):
-            print "model", self.basedir + self.modelname, "not found"
+            print("model", self.basedir + self.modelname, "not found")
             sys.exit()
         if platform.system() == "Windows":
             sep = ";"
@@ -48,10 +48,10 @@ class JSREKernel(ReModel):
 
     def train(self):
         if os.path.isfile(self.basedir + self.modelname):
-            print "removed old model"
+            print("removed old model")
             os.remove(self.basedir + self.modelname)
         if not os.path.isfile(self.temp_dir + self.modelname  + ".txt"):
-            print "could not find training file " + self.basedir + self.modelname + ".txt"
+            print("could not find training file " + self.basedir + self.modelname + ".txt")
             sys.exit()
         if platform.system() == "Windows":
             sep = ";"
@@ -67,15 +67,15 @@ class JSREKernel(ReModel):
         jsrecall = Popen(jsrecall, stdout=PIPE, stderr=PIPE)
         res  = jsrecall.communicate()
         if not os.path.isfile(self.basedir + self.modelname):
-            print "error with jsre! model file was no created"
-            print res[1]
+            print("error with jsre! model file was no created")
+            print(res[1])
             sys.exit()
         else:
             statinfo = os.stat(self.basedir + self.modelname)
             if statinfo.st_size == 0:
-                print "error with jsre! model has 0 bytes"
-                print res[0]
-                print res[1]
+                print("error with jsre! model has 0 bytes")
+                print(res[0])
+                print(res[1])
                 sys.exit()
         #logging.debug(res)
 
@@ -87,8 +87,8 @@ class JSREKernel(ReModel):
         #logging.debug(res[0].strip().split('\n')[-2:])
         #os.system(' '.join(jsrecommand))
         if not os.path.isfile(self.temp_dir + outputfile):
-            print "something went wrong with JSRE!"
-            print res
+            print("something went wrong with JSRE!")
+            print(res)
             sys.exit()
         logging.debug("done.")
 
@@ -110,7 +110,7 @@ class JSREKernel(ReModel):
 
     def generatejSREdata(self, corpus, train=False, pairtype="all"):
         if os.path.isfile(self.temp_dir + self.modelname + ".txt"):
-            print "removed old data"
+            print("removed old data")
             os.remove(self.temp_dir + self.modelname + ".txt")
         examplelines = []
         # get all entities of this document
@@ -283,7 +283,7 @@ class JSREKernel(ReModel):
             original = trainfile.readlines()
 
         if len(pred) != len(original):
-            print "different number of predictions!"
+            print("different number of predictions!")
             sys.exit()
         results = ResultsRE(self.resultsfile)
         temppreds = {}
@@ -305,7 +305,7 @@ class JSREKernel(ReModel):
             if p == 0:
                 p = -1
             if p == 2:
-                print "p=2!"
+                print("p=2!")
                 p = 1
             if p == 1:
                 did = '.'.join(pid.split(".")[:-1])

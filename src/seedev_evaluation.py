@@ -8,19 +8,19 @@ import time
 import sys
 from pycorenlp import StanfordCoreNLP
 
-from classification.results import ResultsRE
-from classification.rext.crfre import CrfSuiteRE
-from classification.rext.jsrekernel import JSREKernel
-from classification.rext.multir import MultiR
-from classification.rext.rules import RuleClassifier
-from classification.rext.scikitre import ScikitRE
-from classification.rext.stanfordre import StanfordRE
-from classification.rext.svmtk import SVMTKernel
-from config import config
-from evaluate import get_relations_results, get_gold_ann_set
-from reader.seedev_corpus import SeeDevCorpus
-from text.corpus import Corpus
-from text.pair import Pairs
+from .classification.results import ResultsRE
+from .classification.rext.crfre import CrfSuiteRE
+from .classification.rext.jsrekernel import JSREKernel
+from .classification.rext.multir import MultiR
+from .classification.rext.rules import RuleClassifier
+from .classification.rext.scikitre import ScikitRE
+from .classification.rext.stanfordre import StanfordRE
+from .classification.rext.svmtk import SVMTKernel
+from .config import config
+from .evaluate import get_relations_results, get_gold_ann_set
+from .reader.seedev_corpus import SeeDevCorpus
+from .text.corpus import Corpus
+from .text.pair import Pairs
 
 
 def write_seedev_results(results, path):
@@ -48,7 +48,7 @@ def main():
     parser.add_argument("actions", default="classify",  help="Actions to be performed.")
     parser.add_argument("--goldstd", default="", dest="goldstd", nargs="+",
                       help="Gold standard to be used. Will override corpus, annotations",
-                      choices=config.paths.keys())
+                      choices=list(config.paths.keys()))
     parser.add_argument("--submodels", default="", nargs='+', help="sub types of classifiers"),
     parser.add_argument("--models", dest="models", help="model destination path, without extension")
     parser.add_argument("--pairtype", dest="ptype", help="type of pairs to be considered", default="all")
@@ -76,7 +76,7 @@ def main():
     # pre-processing options
     if options.actions == "load_corpus":
         if len(options.goldstd) > 1:
-            print "load only one corpus each time"
+            print("load only one corpus each time")
             sys.exit()
         options.goldstd = options.goldstd[0]
         corpus_format = config.paths[options.goldstd]["format"]
@@ -94,7 +94,7 @@ def main():
 
     elif options.actions == "annotate": # rext-add annotation to corpus
         if len(options.goldstd) > 1:
-            print "load only one corpus each time"
+            print("load only one corpus each time")
             sys.exit()
         options.goldstd = options.goldstd[0]
         corpus_path = config.paths[options.goldstd]["corpus"]
@@ -117,12 +117,12 @@ def main():
 
         elif options.actions == "train_relations":
             if options.ptype == "all":
-                ptypes = config.pair_types.keys()
+                ptypes = list(config.pair_types.keys())
                 # ptypes = config.event_types.keys()
             else:
                 ptypes = [options.ptype]
             for p in ptypes:
-                print p
+                print(p)
                 if options.kernel == "jsre":
                     model = JSREKernel(corpus, p, train=True)
                 elif options.kernel == "svmtk":
@@ -140,7 +140,7 @@ def main():
 
         elif options.actions == "test_relations":
             if options.ptype == "all":
-                ptypes = config.pair_types.keys()
+                ptypes = list(config.pair_types.keys())
                 # ptypes = config.event_types.keys()
                 all_results = ResultsRE(options.output[1])
                 all_results.corpus = corpus
@@ -148,7 +148,7 @@ def main():
             else:
                 ptypes = [options.ptype]
             for p in ptypes:
-                print p
+                print(p)
                 if options.kernel == "jsre":
                     model = JSREKernel(corpus, p, train=False)
                 elif options.kernel == "svmtk":
@@ -184,7 +184,7 @@ def main():
             if options.ptype == "all":
                 avg = [0,0,0]
                 for p in config.pair_types:
-                    print p
+                    print(p)
                     tps, fps, fns = corpus.train_sentence_classifier(p)
                     if tps == 0 and fns == 0:
                         precision, recall, fscore = 0, 1, 1
@@ -192,7 +192,7 @@ def main():
                         precision = 1.0 * tps / (fps + tps)
                         recall = 1.0 * fns / (fns + tps)
                         fscore = 2.0 * precision * recall / (recall + precision)
-                    print precision, recall, fscore
+                    print(precision, recall, fscore)
                     avg[0] += tps
                     avg[1] += fps
                     avg[2] += fns
@@ -200,16 +200,16 @@ def main():
                 precision = 1.0 * avg[1] / (avg[0] + avg[1])
                 recall = 1.0 * avg[2] / (avg[0] + avg[2])
                 fscore = 2.0 * precision * recall / (recall + precision)
-                print precision, recall, fscore
+                print(precision, recall, fscore)
             else:
                 res = corpus.train_sentence_classifier(options.ptype)
-                print res
+                print(res)
             corpus.save(config.paths[options.goldstd[0]]["corpus"])
         elif options.actions == "test_sentences": #and evaluate
             if options.ptype == "all":
                 avg = [0,0,0]
                 for p in config.pair_types:
-                    print p
+                    print(p)
                     tps, fps, fns = corpus.test_sentence_classifier(p)
                 if tps == 0 and fns == 0:
                     precision, recall, fscore = 0, 1, 1
@@ -217,7 +217,7 @@ def main():
                     precision = 1.0 * tps / (fps + tps)
                     recall = 1.0 * fns / (fns + tps)
                     fscore = 2.0 * precision * recall / (recall + precision)
-                print precision, recall, fscore
+                print(precision, recall, fscore)
                 avg[0] += tps
                 avg[1] += fps
                 avg[2] += fns
@@ -225,10 +225,10 @@ def main():
             precision = 1.0 * avg[1] / (avg[0] + avg[1])
             recall = 1.0 * avg[2] / (avg[0] + avg[2])
             fscore = 2.0 * precision * recall / (recall + precision)
-            print precision, recall, fscore
+            print(precision, recall, fscore)
         else:
             res = corpus.test_sentence_classifier(options.ptype)
-            print res
+            print(res)
         corpus.save(config.paths[options.goldstd[0]]["corpus"])
 
     total_time = time.time() - start_time

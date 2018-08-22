@@ -29,7 +29,7 @@ import sklearn.metrics as skm
 from sklearn.preprocessing import normalize
 from sklearn.preprocessing import MinMaxScaler
 
-import relations
+from . import relations
 
 
 basedir = "models/ddi_models/"
@@ -241,10 +241,10 @@ def blind_all_entities(tokens, entities, eids, pos, lemmas, ner):
 
 def trainjSRE(inputfile, model="slk_classifier.model"):
     if os.path.isfile("ddi_models/" + model):
-        print "removed old model"
+        print("removed old model")
         os.remove("ddi_models/" + model)
     if not os.path.isfile(temp_dir + inputfile):
-        print "could not find training file " + basedir + inputfile
+        print("could not find training file " + basedir + inputfile)
         sys.exit()
     if platform.system() == "Windows":
         sep = ";"
@@ -259,15 +259,15 @@ def trainjSRE(inputfile, model="slk_classifier.model"):
     jsrecall = Popen(jsrecall, stdout = PIPE, stderr = PIPE)
     res  = jsrecall.communicate()
     if not os.path.isfile("ddi_models/" + model):
-        print "error with jsre!"
-        print res[1]
+        print("error with jsre!")
+        print(res[1])
         sys.exit()
     else:
         statinfo = os.stat("ddi_models/" + model)
         if statinfo.st_size == 0:
-            print "error with jsre! model has 0 bytes"
-            print res[0]
-            print res[1]
+            print("error with jsre! model has 0 bytes")
+            print(res[0])
+            print(res[1])
             sys.exit()
     #logging.debug(res)
 
@@ -276,7 +276,7 @@ def testjSRE(inputfile, outputfile, model="slk_classifier.model"):
     if os.path.isfile(temp_dir + outputfile):
         os.remove(temp_dir + outputfile)
     if not os.path.isfile(basedir + model):
-        print "model", basedir + model, "not found"
+        print("model", basedir + model, "not found")
         sys.exit()   
     if platform.system() == "Windows":
         sep = ";"
@@ -294,8 +294,8 @@ def testjSRE(inputfile, outputfile, model="slk_classifier.model"):
     #logging.debug(res[0].strip().split('\n')[-2:])
     #os.system(' '.join(jsrecommand))
     if not os.path.isfile(temp_dir + outputfile):
-        print "something went wrong with JSRE!"
-        print res
+        print("something went wrong with JSRE!")
+        print(res)
         sys.exit()
     #logging.debug("done.")
 
@@ -309,7 +309,7 @@ def getjSREPredicitons(examplesfile, resultfile, pairs):
         original = trainfile.readlines()
 
     if len(pred) != len(original):
-        print "different number of predictions!"
+        print("different number of predictions!")
         sys.exit()
 
     temppreds = {}
@@ -318,9 +318,9 @@ def getjSREPredicitons(examplesfile, resultfile, pairs):
         # logging.debug(original_tsv)
         pid = '.'.join(original_tsv[1].split('.')[:-1])
         if pid not in pairs:
-            print "pair not in pairs!"
-            print pid
-            print pairs
+            print("pair not in pairs!")
+            print(pid)
+            print(pairs)
             sys.exit()
         #confirm that everything makes sense
         # true = float(original_tsv[0])
@@ -331,7 +331,7 @@ def getjSREPredicitons(examplesfile, resultfile, pairs):
         if p == 0:
             p = -1
         if p == 2:
-            print "p=2!"
+            print("p=2!")
             p = 1
         logging.debug("{} - {} SLK: {}".format(pairs[pid].entities[0], pairs[pid].entities[1], p))
         #if pair not in temppreds:
@@ -454,8 +454,8 @@ def trainSVMTK(docs, pairs, dditype, model="svm_tk_classifier.model", excludesen
                          stdout = PIPE, stderr = PIPE)
     res  = svmlightcall.communicate()
     if not os.path.isfile("ddi_models/" + model):
-        print "failed training model " + basedir + model
-        print res
+        print("failed training model " + basedir + model)
+        print(res)
         sys.exit()
 
 
@@ -491,14 +491,14 @@ def testSVMTK(sentence, pairs, pairs_list, model="svm_tk_classifier.model", tag=
     # logging.debug(res[0].split('\n')[-3:])
     #os.system(' '.join(svmtklightargs))
     if not os.path.isfile(temp_dir + tag + "svm_test_output.txt"):
-        print "something went wrong with SVM-light-TK"
-        print res
+        print("something went wrong with SVM-light-TK")
+        print(res)
         sys.exit()
     with open(temp_dir + tag + "svm_test_output.txt", 'r') as out:
         lines = out.readlines()
     if len(lines) != len(pairs_list):
-        print "check " + tag + "svm_test_output.txt! something is wrong"
-        print res
+        print("check " + tag + "svm_test_output.txt! something is wrong")
+        print(res)
         sys.exit()
     for p, pid in enumerate(pairs):
         score = float(lines[p])
@@ -542,10 +542,10 @@ def main():
 
 
     if options.file in os.listdir(os.getcwd()) and not options.reload:
-        print "loading corpus pickle", options.file
+        print("loading corpus pickle", options.file)
         docs = pickle.load(open(options.file, 'rb'))
     else:
-        print "loading corpus", options.dir
+        print("loading corpus", options.dir)
         docs = relations.loadCorpus(options.dir)
         pickle.dump(docs, open(options.file, 'wb'))
     #build_data_frame(docs)

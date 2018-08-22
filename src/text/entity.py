@@ -1,4 +1,4 @@
-from __future__ import division, absolute_import, unicode_literals
+
 
 import xml.etree.ElementTree as ET
 import logging
@@ -225,7 +225,7 @@ class Entities(object):
                         e.ssm_score_all= {s: e.ssm_score}
                         combined[next_eid] = e
                         #logging.info("new entity: {0}-{1}".format(s.split("_")[-1], combined[next_eid].text))
-        self.elist[name] = combined.values()
+        self.elist[name] = list(combined.values())
 
     def get_offsets(self, esource, ths, rules):
         spans = []
@@ -261,7 +261,7 @@ class Entities(object):
         for e in self.elist[source]:
             if e.eid == eid:
                 return e
-        print "entity not found:", eid, source
+        print("entity not found:", eid, source)
 
 
     def get_offsets2(self, esource, ths, rules):

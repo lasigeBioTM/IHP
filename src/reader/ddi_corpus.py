@@ -90,10 +90,10 @@ class DDICorpus(Corpus):
                     sid = sentence.get('id')
                     this_sentence = self.documents[did].get_sentence(sid)
                     if this_sentence is None:
-                        print did, sid, "sentence not found!"
+                        print(did, sid, "sentence not found!")
                         for entity in sentence.findall('entity'):
-                            print entity.get('charOffset'), entity.get("type")
-                        print [s.sid for s in self.documents[did].sentences]
+                            print(entity.get('charOffset'), entity.get("type"))
+                        print([s.sid for s in self.documents[did].sentences])
                         sys.exit()
                         #continue
                     for entity in sentence.findall('entity'):

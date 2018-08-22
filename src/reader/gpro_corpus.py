@@ -2,7 +2,7 @@ import codecs
 import logging
 import pickle
 
-from chemdner_corpus import ChemdnerCorpus
+from .chemdner_corpus import ChemdnerCorpus
 
 
 class GproCorpus(ChemdnerCorpus):

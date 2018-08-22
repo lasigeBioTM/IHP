@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, unicode_literals
+
 import MySQLdb
 import re
 import sys
@@ -8,7 +8,7 @@ import os
 import shutil
 from subprocess import Popen, PIPE
 from optparse import OptionParser
-import cPickle as pickle
+import pickle as pickle
 import logging
 from sys import platform as _platform
 import atexit
@@ -143,7 +143,7 @@ def get_IC():
     cur.execute(query)
 
     res = cur.fetchall()
-    return zip(*res)
+    return list(zip(*res))
 
 
 def find_chebi_term3(term):
@@ -159,7 +159,7 @@ def find_chebi_term3(term):
     return c
 
 def exit_handler():
-    print 'Saving chebi dictionary...!'
+    print('Saving chebi dictionary...!')
     pickle.dump(chebi, open(chebidic, "wb"))
 
 atexit.register(exit_handler)
@@ -198,12 +198,12 @@ def loadC2G(go2chebi="GO_to_ChEBI.obo", outname="chebi2go.pickle"):
         if len(c2gdic[c]) not in counts:
             counts[len(c2gdic[c])] = 0
         counts[len(c2gdic[c])] += 1
-    print counts
-    print "CHEBI:17790 - ", c2gdic["CHEBI:17790"]
-    print "gos and chebis:", len(gos), len(chebis)
-    print "unique:", len(set(gos)), len(set(chebis))
+    print(counts)
+    print("CHEBI:17790 - ", c2gdic["CHEBI:17790"])
+    print("gos and chebis:", len(gos), len(chebis))
+    print("unique:", len(set(gos)), len(set(chebis)))
     pickle.dump(c2gdic, open(outname, 'w'))
-    print "mappings written to", outname
+    print("mappings written to", outname)
 
 
 def get_description(id):
@@ -228,7 +228,7 @@ def load_synonyms():
     cur.execute(query)
     ids = cur.fetchall()
     for i in ids:
-        print "getting synonyms for" + i[1].lower() + '(' + str(i[0]) + ')',
+        print("getting synonyms for" + i[1].lower() + '(' + str(i[0]) + ')', end=' ')
         synset = set()
         synset.add(i[1].lower())
         query = """SELECT term_synonym
@@ -236,13 +236,13 @@ def load_synonyms():
            WHERE term_id = %s""" % i[0]
         cur.execute(query)
         names = cur.fetchall()
-        print len(names)
+        print(len(names))
         for name in names:
             #print name[0], 
             synset.add(name[0].lower())
         syns.append(synset)
     pickle.dump(syns, open("data/chebi_synonyms.pickle", 'wb'))
-    print "done"
+    print("done")
 
 
 def check_dist_between(cid1, cid2):
@@ -353,7 +353,7 @@ def main():
             i = 0
             count = 0
             errors = 0
-            print type
+            print(type)
             sys.stdout.flush()
             for chem in chemlist[type]:
                 count += 1
@@ -363,7 +363,7 @@ def main():
                 elif len(chem) > 1:
                     if chem[1] != res[0]:
                         errors += 1
-            print type + " nulls: " + str(i) + ' errors:' + str(errors) + ' total:' + str(count)
+            print(type + " nulls: " + str(i) + ' errors:' + str(errors) + ' total:' + str(count))
     elif options.action == 'batch':
 
         dir = options.dir
@@ -372,7 +372,7 @@ def main():
             lines = []
             if not f.endswith('with-chebi.txt') and not f.endswith('with-ssm.txt') and\
                                     f + '-with-chebi.txt' not in files and not os.path.isdir(dir + '/' + f):
-                print dir + '/' + f
+                print(dir + '/' + f)
                 with open(dir + '/' + f, 'r') as predfile:
                     for line in predfile:
                         tsv = line.strip().split('\t')
@@ -384,19 +384,19 @@ def main():
                         chebifile.write(line)
         #print "writing pickle..."
         #pickle.dump(chebidic, open("chebi_dic.pickle", "wb"))
-        print "done."
+        print("done.")
 
     elif options.action == "info":
         info = get_IC()
         pickle.dump(info, open("chebi_IC.pickle", "wb"))
 
     elif options.action == "map":
-        print find_chebi_term(options.text)
+        print(find_chebi_term(options.text))
     elif options.action == "chebi2go":
         if options.text == "all":
             loadC2G()
         else:
-            print chebi2go(options.text)
+            print(chebi2go(options.text))
     elif options.action == "synonyms":
         load_synonyms()
 

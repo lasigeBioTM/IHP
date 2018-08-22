@@ -24,7 +24,7 @@ class JNLPBACorpus(Corpus):
         with open(self.path) as f:
             for nlines, l in enumerate(f):
                 pass
-        print nlines
+        print(nlines)
         pbar = pb.ProgressBar(widgets=widgets, maxval=nlines).start()
         with codecs.open(self.path, 'r', "utf-8") as corpusfile:
             doc_text = ""
@@ -88,7 +88,7 @@ class JNLPBACorpus(Corpus):
                             eid = this_sentence.tag_entity(estart, eend, etype,
                                                            text=entity_text)
                             if eid is None:
-                                print "did not add this entity: {}".format(entity_text)
+                                print("did not add this entity: {}".format(entity_text))
                             added = True
                     if sentence_text != "":
                         sentence_text += " "

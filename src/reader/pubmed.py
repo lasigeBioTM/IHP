@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import httplib
+import http.client
 #import xml.dom.minidom as minidom
 #import urllib
 import logging
@@ -38,7 +38,7 @@ class PubmedDocument(Document):
     
     def parse_pubmed_xml(self, xml):
         if xml.strip() == '':
-            print "PMID not found"
+            print("PMID not found")
             sys.exit()
         else:
             root = ET.fromstring(xml.encode("utf-8"))
@@ -55,8 +55,8 @@ class PubmedDocument(Document):
                 else:
                     abstext = ""
             else:
-                print "Abstract not found:", title
-                print xml[:50]
+                print("Abstract not found:", title)
+                print(xml[:50])
                 abstext = ""
                 #print xml
                 #sys.exit()
@@ -65,7 +65,7 @@ class PubmedDocument(Document):
     
 def main():
     pubmeddoc = PubmedDocument(sys.argv[1])
-    print pubmeddoc
+    print(pubmeddoc)
     
 if __name__ == "__main__":
     main()

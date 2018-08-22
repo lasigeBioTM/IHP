@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+
 import os
 from subprocess import Popen, PIPE
 import codecs
@@ -99,13 +99,13 @@ class SVMTKernel(ReModel):
                                # "-L", "0.5", "-T", "2", "-S", "2", "-g", "1",
                               "-D", "1", "-C", "T", self.temp_dir + self.modelname + ".txt",
                               self.basedir + self.modelname]
-        print " ".join(svmlightargs)
+        print(" ".join(svmlightargs))
         svmlightcall = Popen(svmlightargs,)
                              # stdout = PIPE, stderr = PIPE)
         res = svmlightcall.communicate()
         if not os.path.isfile(self.basedir + self.modelname):
-            print "failed training model " + self.basedir + self.modelname
-            print res
+            print("failed training model " + self.basedir + self.modelname)
+            print(res)
             sys.exit()
 
     def load_classifier(self):
@@ -137,8 +137,8 @@ class SVMTKernel(ReModel):
         # logging.debug(res[0].split('\n')[-3:])
         #os.system(' '.join(svmtklightargs))
         if not os.path.isfile(self.temp_dir + "svm_test_output.txt"):
-            print "something went wrong with SVM-light-TK"
-            print res
+            print("something went wrong with SVM-light-TK")
+            print(res)
             sys.exit()
 
     def get_predictions(self, corpus, resultfile="jsre_results.txt"):

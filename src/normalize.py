@@ -6,7 +6,7 @@ import time
 
 import sys
 
-from config import config
+from .config import config
 
 def add_chebi_mappings(results, path, source, save=True):
     """
@@ -108,7 +108,7 @@ def main():
                       help="Actions to be performed.")
     parser.add_argument("goldstd", default="chemdner_sample",
                       help="Gold standard to be used.",
-                      choices=config.paths.keys())
+                      choices=list(config.paths.keys()))
     parser.add_argument("--corpus", dest="corpus",
                       default="data/chemdner_sample_abstracts.txt.pickle",
                       help="format path")
@@ -138,12 +138,12 @@ def main():
         results = pickle.load(open(options.results + ".pickle", 'rb'))
         results.path = options.results
     else:
-        print "results not found"
+        print("results not found")
         results = None
 
     if options.action == "chebi":
         if not config.use_chebi:
-            print "If you want to use ChEBI, please re-run config.py and set use_chebi to true"
+            print("If you want to use ChEBI, please re-run config.py and set use_chebi to true")
             sys.exit()
         add_chebi_mappings(results, options.results + ".pickle", options.models)
     # if options.action == "go":

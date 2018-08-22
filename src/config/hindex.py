@@ -2,7 +2,7 @@
 import MySQLdb
 import sys
 import numpy as np
-import config
+from . import config
 
 chebidb = config.chebi_conn
 
@@ -83,15 +83,15 @@ def main():
             query = "UPDATE {} SET hindex = %s WHERE {} = %s".format(maintable, maincol)
             cur.execute(query, (hi, id[0]))
             db.commit()
-            print "Row(s) were updated :" +  str(cur.rowcount) 
+            print("Row(s) were updated :" +  str(cur.rowcount)) 
             if h in dist:
                 dist[h] += 1
             else:
                 dist[h] = 1
-        print dist
+        print(dist)
 
     else:
-        print hindex(sys.argv[1]), round(1.0/(hindex(sys.argv[1])+1), 6)
+        print(hindex(sys.argv[1]), round(1.0/(hindex(sys.argv[1])+1), 6))
             
 if __name__ == "__main__":
     main()

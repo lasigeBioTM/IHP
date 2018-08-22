@@ -18,7 +18,7 @@ from nltk.tree import Tree
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import wordnet
 
-import relations
+from . import relations
 
 class ReModel(object):
     def __init__(self):
@@ -147,7 +147,7 @@ class ReModel(object):
         for p in corpus.documents[did].pairs.pairs:
             if p.pid == pid:
                 return p
-        print "pid not found: {}".format(pid)
+        print("pid not found: {}".format(pid))
 
 def main():
     parser = OptionParser(usage='train and evaluate ML model for DDI classification based on the DDI corpus')
@@ -181,10 +181,10 @@ def main():
 
 
     if options.file in os.listdir(os.getcwd()) and not options.reload:
-        print "loading corpus pickle", options.file
+        print("loading corpus pickle", options.file)
         docs = pickle.load(open(options.file, 'rb'))
     else:
-        print "loading corpus", options.dir
+        print("loading corpus", options.dir)
         docs = relations.loadCorpus(options.dir)
         pickle.dump(docs, open(options.file, 'wb'))
 

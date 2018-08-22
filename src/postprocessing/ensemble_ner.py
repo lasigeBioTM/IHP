@@ -6,7 +6,7 @@ from sklearn.pipeline import Pipeline
 import logging
 from sklearn.externals import joblib
 import os
-import cPickle as pickle
+import pickle as pickle
 import atexit
 
 from text.chemical_entity import chem_words

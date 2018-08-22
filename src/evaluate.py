@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from __future__ import division
+
 import argparse
-import cPickle as pickle
+import pickle as pickle
 import codecs
 import collections
 import logging
@@ -118,8 +118,8 @@ def compare_results(offsets, goldoffsets, corpus, getwords=True, evaltype="entit
     fnreport, fnwords = get_report(fns, corpus, getwords=getwords)
     tpreport, tpwords = get_report(tps, corpus, getwords=getwords)
     alldocs = set(fpreport.keys())
-    alldocs = alldocs.union(fnreport.keys())
-    alldocs = alldocs.union(tpreport.keys())
+    alldocs = alldocs.union(list(fnreport.keys()))
+    alldocs = alldocs.union(list(tpreport.keys()))
     if getwords:
         report.append("Common FPs")
         fpcounter = collections.Counter(fpwords)
@@ -178,7 +178,7 @@ def get_report(results, corpus, getwords=True):
         if did not in report:
             report[did] = []
         if getwords:
-            line = u"{}\t{}:{}\t{}".format(did, start, end, tokentext)
+            line = "{}\t{}:{}\t{}".format(did, start, end, tokentext)
         else:
             line = did + '\t' + start + ":" + end
         report[did].append(line)
@@ -196,10 +196,10 @@ def get_list_results(results, models, goldset, ths, rules, mode="ner"):
     :param ths: Validation thresholds
     :param rules: Validation rules
     """
-    print "saving results to {}".format(results.path + ".tsv")
+    print("saving results to {}".format(results.path + ".tsv"))
 
     sysresults = results.corpus.get_unique_results(models, ths, rules, mode)
-    print "{} unique entries".format(len(sysresults))
+    print("{} unique entries".format(len(sysresults)))
     with codecs.open(results.path + "_final.tsv", 'w', 'utf-8') as outfile:
         outfile.write('\n'.join(['\t'.join(x) for x in sysresults]))
     if goldset:
@@ -217,9 +217,9 @@ def get_list_results(results, models, goldset, ths, rules, mode="ner"):
                 recall = len(tps)/(len(tps) + len(fns))
                 fmeasure = (2*precision*recall)/(precision + recall)
             reportfile.write("Precision: {!s}\nRecall: {!s}\n".format(precision, recall))
-            print "precision: {}".format(precision)
-            print "recall: {}".format(recall)
-            print "f-measure: {}".format(fmeasure)
+            print("precision: {}".format(precision))
+            print("recall: {}".format(recall))
+            print("f-measure: {}".format(fmeasure))
             for line in reportlines:
                 reportfile.write(line + '\n')
 
@@ -238,7 +238,7 @@ def get_relations_results(results, model, gold_pairs, ths, rules, compare_text=T
                 if val:
                     ptrue += 1
                     pair = (did, (p.entities[0].dstart, p.entities[0].dend), (p.entities[1].dstart, p.entities[1].dend),
-                            u"{}={}>{}".format(p.entities[0].text, p.relation, p.entities[1].text))
+                            "{}={}>{}".format(p.entities[0].text, p.relation, p.entities[1].text))
                              # u"{}=>{}".format(p.entities[0].text, p.entities[1].text))
                     system_pairs.append(pair)
     # print random.sample(system_pairs, 5)
@@ -248,7 +248,7 @@ def get_relations_results(results, model, gold_pairs, ths, rules, compare_text=T
         gold_pairs = [(o[0], o[1], o[2], "") for o in gold_pairs]
     reportlines, tps, fps, fns = compare_results(set(system_pairs), gold_pairs, results.corpus, getwords=compare_text)
     with codecs.open(results.path + "_report.txt", 'w', "utf-8") as reportfile:
-        print "writing report to {}_report.txt".format(results.path)
+        print("writing report to {}_report.txt".format(results.path))
         reportfile.write("TPs: {!s}\nFPs: {!s}\nFNs: {!s}\n".format(len(tps), len(fps), len(fns)))
         reportfile.write(">\n")
         if len(tps) == 0:
@@ -259,8 +259,8 @@ def get_relations_results(results, model, gold_pairs, ths, rules, compare_text=T
         reportfile.write(">\n")
         for line in reportlines:
             reportfile.write(line + '\n')
-    print "Precision: {}".format(precision)
-    print "Recall: {}".format(recall)
+    print("Precision: {}".format(precision))
+    print("Recall: {}".format(recall))
     return precision, recall
 
 def get_results(results, models, gold_offsets, ths, rules, compare_text=True):
@@ -283,7 +283,7 @@ def get_results(results, models, gold_offsets, ths, rules, compare_text=True):
     # logging.debug(offsets)
     for o in offsets:
         if o[0] not in results.corpus.documents:
-            print "DID not found! {}".format(o[0])
+            print("DID not found! {}".format(o[0]))
             sys.exit()
     if not compare_text: #e.g. gold standard does not include the original text
         offsets = [(o[0], o[1], o[2], "") for o in offsets]
@@ -291,7 +291,7 @@ def get_results(results, models, gold_offsets, ths, rules, compare_text=True):
     reportlines, tps, fps, fns = compare_results(set(offsets), gold_offsets, results.corpus, getwords=compare_text)
 
     with codecs.open(results.path + "_report.txt", 'w', "utf-8") as reportfile:
-        print "writing report to {}_report.txt".format(results.path)
+        print("writing report to {}_report.txt".format(results.path))
         reportfile.write("TPs: {!s}\nFPs: {!s}\nFNs: {!s}\n".format(len(tps), len(fps), len(fns)))
         reportfile.write(">\n")
         if len(tps) == 0:
@@ -304,11 +304,11 @@ def get_results(results, models, gold_offsets, ths, rules, compare_text=True):
         reportfile.write(">\n")
         for line in reportlines:
             reportfile.write(line + '\n')
-    print "Precision: {}".format(precision)
-    print "Recall: {}".format(recall)
+    print("Precision: {}".format(precision))
+    print("Recall: {}".format(recall))
 
     with codecs.open(results.path + "_report_ALL.txt", 'a', "utf-8") as reportfile:
-        print "writing report to {}_report.txt".format(results.path)
+        print("writing report to {}_report.txt".format(results.path))
         reportfile.write("TPs: {!s}\nFPs: {!s}\nFNs: {!s}\n".format(len(tps), len(fps), len(fns)))
         reportfile.write(">\n")
         if len(tps) == 0:
@@ -325,8 +325,8 @@ def get_results(results, models, gold_offsets, ths, rules, compare_text=True):
     a = open("data/fps.txt", "a")
     aa = open("data/fps_same_terms.txt", "a")
     b = open("data/fns.txt", "a")
-    gz = open("data/annotation_gazette.txt").readlines()
-    gaz = open("data/gazette.txt").readlines()
+    gz = open("data/annotation_gazette.txt", encoding='utf-8').readlines()
+    gaz = open("data/gazette.txt", encoding='utf-8').readlines()
     a.write("Precision: {!s}\nRecall: {!s}\n".format(precision, recall))
     b.write("Precision: {!s}\nRecall: {!s}\n".format(precision, recall))
 
@@ -415,7 +415,7 @@ def main():
                       help="Actions to be performed.")
     parser.add_argument("goldstd", default="chemdner_sample",
                       help="Gold standard to be used.",
-                      choices=config.paths.keys())
+                      choices=list(config.paths.keys()))
     parser.add_argument("--corpus", dest="corpus",
                       default="data/chemdner_sample_abstracts.txt.pickle",
                       help="format path")
@@ -450,7 +450,7 @@ def main():
         results = pickle.load(open(options.results + ".pickle", 'rb'))
         results.path = options.results
     else:
-        print "results not found"
+        print("results not found")
         sys.exit()
 
     if options.action == "combine":

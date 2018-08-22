@@ -11,8 +11,8 @@ from other.dictionary import stopwords, removewords, go_words, definingwords, go
 
 same_stop_words = [""]
 describing = ["recurrent", "male", "female", "postnatal", "progressive", "isolated", "postpubertal", "severe", "distal", "conductive", "mixed", "congenital", "bilateral", "unilateral", "chronic", "episodic", "mild", "borderline-mild", "global", "generalized", "partial", "acute", "proximal", "profound", "complete", "moderate", "diffuse", "nonprogressive", "extreme", "general"]
-annotation_gazette = open("data/annotation_gazette.txt")
-gazette = open("data/gazette.txt")
+annotation_gazette = open("data/annotation_gazette.txt", encoding='utf-8')
+gazette = open("data/gazette.txt", encoding='utf-8')
 ann_gaz = [x.strip() for x in annotation_gazette]
 gazz = [x.strip() for x in gazette]
 class SuiteCorpus(HPOCorpus):
@@ -164,10 +164,10 @@ class SuiteCorpus(HPOCorpus):
 		else:
 			sentence = self.documents[did].find_sentence_containing(start, end)
 			if not sentence:
-				print "could not find this sentence!", start, end
+				print("could not find this sentence!", start, end)
 		tokens = sentence.find_tokens_between(start, end)
 		if not tokens:
-			print "could not find tokens!", start, end, sentence.sid, ':'.join(res)
+			print("could not find tokens!", start, end, sentence.sid, ':'.join(res))
 			sys.exit()
 		entity = sentence.entities.find_entity(start - sentence.offset, end - sentence.offset)
 		return tokens, sentence, entity

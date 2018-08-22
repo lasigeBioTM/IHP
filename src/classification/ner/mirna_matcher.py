@@ -2,7 +2,7 @@ import logging
 
 __author__ = 'Andre'
 import re
-from matcher import MatcherModel
+from .matcher import MatcherModel
 
 class MirnaMatcher(MatcherModel):
     """

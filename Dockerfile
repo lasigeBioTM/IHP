@@ -3,6 +3,13 @@ MAINTAINER Andre Lamurias <alamurias@lasige.di.fc.ul.pt>
 WORKDIR /
 COPY bin/ bin/
 
+RUN apt-get update -y
+RUN apt-get dist-upgrade -y
+
+# Install Python 3.6
+RUN apt-get install software-properties-common -y
+
+
 # Install Java
 RUN \
   echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
@@ -61,11 +68,10 @@ RUN nohup java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -po
 
 # Install Python Libraries
 WORKDIR /
-COPY requirements.txt /
-RUN apt-get update -y  && apt-get install -y python2.7 && apt-get install python-pip -y && apt-get install libmysqlclient-dev -y
-RUN pip install -r requirements.txt
 RUN apt-get update -y && apt-get -y install git liblapack-dev liblapack3 libopenblas-base libopenblas-dev
-RUN apt-get update -y && apt-get install -y python-mysqldb
+RUN apt-get update -y && apt-get -y install python3-dev libmysqlclient-dev -y
+COPY requirements.txt /
+RUN apt-get update -y && apt-get install python3-pip -y && pip3 install mysqlclient && apt-get install python3-scipy -y && pip3 install -r requirements.txt
 
 
 # Copy Repository Dirs and Create Sample Data
@@ -81,14 +87,15 @@ RUN for file in corpora/hpo/test_ann/*; do mv Text/"$(basename "$file")" corpora
 RUN mv Annotations/* corpora/hpo/train_ann/
 RUN mv Text/* corpora/hpo/train_corpus/
 RUN rm -rf Annotations Text log.txt
-RUN pip install -e git+https://github.com/garydoranjr/misvm.git#egg=misvm
+RUN pip3 install -e git+https://github.com/garydoranjr/misvm.git#egg=misvm
 
 
 # Initial Configuration
-RUN pip install --upgrade cython
-RUN pip install word2vec
-RUN python -m nltk.downloader punkt
-RUN pip install python-levenshtein
+RUN pip3 install --upgrade cython
+RUN pip3 install word2vec
+RUN python3 -m nltk.downloader punkt
+RUN pip3 install python-levenshtein
+RUN pip3 install numpy --upgrade
 RUN mv bin/base.prop bin/stanford-ner-2015-04-20/
 COPY settings_base.json /
 COPY settings.json /
