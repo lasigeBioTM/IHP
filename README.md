@@ -9,7 +9,7 @@ It uses Gold Standard Corpora and Test Suites Created by Bio-Lark. [Link Here](h
 # Usage
 If a corpus is to be loaded into IHP, it's necessary to run Stanford CoreNLP. 
    ```
-   cd StanfordCoreNLP_Folder
+   cd bin/stanford-corenlp-full-2015-12-09/
    java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -timeout 500000 &
    ```
 
