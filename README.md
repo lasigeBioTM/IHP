@@ -52,7 +52,7 @@ Replace the sample corpus in corpora/hpo/test_corpus/ by the new, unlabeled, uns
     python src/main.py load_corpus --goldstd hpo_test --log DEBUG
     python src/main.py test --goldstd hpo_test -o pickle data/results_hpo_train --models models/hpo_train --log DEBUG
     python src/evaluate.py evaluate hpo_test --results data/results_hpo_train --models models/hpo_train --log DEBUG
-    ```
+```
     
 The report file in data/results_hpo_train_report.txt will have the generated annotations marked as false positives (because no annotation file was provided).
 
